@@ -1,13 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter as Router, Routes, Route, Link, Switch, withRouter} from 'react-router-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+
+import MyNavbar from './MyNavbar';
+import PageOfCalendar from './PageOfCalendar.js';
+import PageOfMakeRule from './PageOfMakeRule.js';
+import PageOfRuleList from './PageOfRuleList';
+import PageOfSettings from './PageOfSettings.js';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <MyNavbar/>
+    <Router>
+      <div>
+        <Routes>
+          <Route path="/" element={<PageOfCalendar />}/>
+          <Route path="/make" element={<PageOfMakeRule />}/>
+          <Route path="/calendar" element={<PageOfCalendar />}/>
+          <Route path="/list" element={<PageOfRuleList />}/>
+          <Route path="/settings" element={<PageOfSettings />}/>
+        </Routes>
+      </div>
+    </Router>
   </React.StrictMode>
 );
 
