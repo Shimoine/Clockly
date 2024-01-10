@@ -9,6 +9,7 @@ import reportWebVitals from './reportWebVitals';
 import MyNavbar from './MyNavbar';
 import PageOfCalendar from './PageOfCalendar.js';
 import PageOfMakeRule from './PageOfMakeRule.js';
+import PageOfEditRule from './PageOfEditRule.js';
 import PageOfRuleList from './PageOfRuleList';
 import PageOfSettings from './PageOfSettings.js';
 
@@ -24,7 +25,7 @@ ReactDOM.render(
         <Routes>
           <Route path="/" element={<PageOfCalendar />}/>
           <Route path="/make" element={<PageOfMakeRule />}/>
-          <Route path="/edit/:name" element={<PageOfMakeRule />}/>
+          <Route path="/edit/:name" element={<PageOfEditRule />}/>
           <Route path="/calendar" element={<PageOfCalendar />}/>
           <Route path="/list" element={<PageOfRuleList />}/>
           <Route path="/settings" element={<PageOfSettings />}/>

@@ -36,13 +36,13 @@ function PageOfMakeRule(props) {
 
     const createRule = () => {
         var xml = {
-            id: crypto.randomUUID(),
+            id: location.state?.id,
             name: name,
             blockXml: Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)),
             jsCode: Blockly.JavaScript.workspaceToCode(workspace),
             rbCode: Blockly.Python.workspaceToCode(workspace)
         };
-        fetch("/create_program", {
+        fetch("/update_program", {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -63,6 +63,7 @@ function PageOfMakeRule(props) {
     }
 
     useEffect(() => {
+        setName(location.state?.name);
         setBlockXml(location.state?.block);
     }, []);
 
@@ -80,7 +81,7 @@ function PageOfMakeRule(props) {
                     <Tab>Ruby</Tab>
                 </TabList>
                 <TabPanel>
-                    <UseBlockly h={400} w={1200} setWorkspace={i => setWorkspace(i)} blockXml={blockXml}/>
+                    <UseBlockly h={400} w={1200} setWorkspace={i => setWorkspace(i)} blockXml={location.state?.block}/>
                 </TabPanel>
                 <TabPanel>
                     <pre><code>{jsCode}</code></pre>
@@ -92,7 +93,7 @@ function PageOfMakeRule(props) {
             <p/>
             <Link to="/list">
                 <Button variant="outline-success" onClick={createRule}>
-                    ルールを作成
+                    ルールを変更
                 </Button>
             </Link>
         </div>
