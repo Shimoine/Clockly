@@ -94,6 +94,8 @@ get '/calendar_list' do
 end
 
 get '/calendar/:id?' do
+    puts @client.list_events(params["id"], single_events: true)
+    return @client.list_events(params["id"], single_events: true).to_h.to_json
 end
 
 # カレンダの更新機能
@@ -104,12 +106,34 @@ post '/delete_calendar' do
 end
 
 post '/insert_event' do
+    data = JSON.parse(request.body.read)
+    calendar_id = data['calendar_id']
+    event = data['event']
+    puts event['start']['date']
+    puts event['start']['date_time']
+    google_event = Google::Apis::CalendarV3::Event.new(
+        summary: event['summary'],
+        location: event['location'],
+        start: {
+            date: event['start']['date'],
+            date_time: event['start']['date_time']
+        },
+        end: {
+            date: event['end']['date'],
+            date_time: event['end']['date_time']
+        }
+    )
+    @client.insert_event(calendar_id, google_event)
 end
 
 post '/update_event' do
 end
 
 post '/delete_event' do
+    data = JSON.parse(request.body.read)
+    calendar_id = data['calendar_id']
+    event_id = data['event_id']
+    @client.delete_event(calendar_id, event_id)
 end
 
 #####################################################
@@ -146,28 +170,32 @@ post '/update_program' do
     updated_program = {
         "id" => "#{data['id']}",
         "name" => "#{data['name']}",
-        "block" => "#{data['block']}",
-        "code" => "#{data['code']}",
+        "block" => "#{data['blockXml']}",
+        "code" => "#{data['jsCode']}",
+        "rbcode" => "#{data['rbCode']}",
     }
-    return nil if programs = file_load("program-repository.json")
+    #return nil if programs = file_load("program-repository.json")
+    programs = file_load("program-repository.json")
     programs = JSON.parse(programs)
     programs.each_with_index do |program, i|
         if program["id"] == updated_program["id"]
             programs.delete_at(i);
         end
     end
-    programs << program
+    programs << updated_program
     file_store("program-repository.json", programs.to_json)
 end
 
 post '/delete_program' do
     data = JSON.parse(request.body.read)
     delete_program_id = data['id']
-    return nil if programs = file_load("program-repository.json")
+    puts delete_program_id
+    return nil unless programs = file_load("program-repository.json")
     programs = JSON.parse(programs)
     programs.each_with_index do |program, i|
         if program["id"] == delete_program_id
             programs.delete_at(i);
         end
     end
+    file_store("program-repository.json", programs.to_json)
 end

@@ -13,6 +13,7 @@ function PageOfRuleList() {
                 var rule_list = [];
                 for(let i in programs) {
                     var rule = {
+                        id: programs[i].id,
                         name: programs[i].name,
                         blockXml: programs[i].block,
                         code: programs[i].code
