@@ -1,7 +1,9 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+//import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, Link, Switch, withRouter} from 'react-router-dom';
 import './index.css';
+import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 import MyNavbar from './MyNavbar';
@@ -12,8 +14,9 @@ import PageOfSettings from './PageOfSettings.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+//const root = ReactDOM.createRoot(document.getElementById('root'));
+//root.render(
+ReactDOM.render(
   <React.StrictMode>
     <MyNavbar/>
     <Router>
@@ -21,13 +24,15 @@ root.render(
         <Routes>
           <Route path="/" element={<PageOfCalendar />}/>
           <Route path="/make" element={<PageOfMakeRule />}/>
+          <Route path="/edit/:name" element={<PageOfMakeRule />}/>
           <Route path="/calendar" element={<PageOfCalendar />}/>
           <Route path="/list" element={<PageOfRuleList />}/>
           <Route path="/settings" element={<PageOfSettings />}/>
         </Routes>
       </div>
     </Router>
-  </React.StrictMode>
+  </React.StrictMode>,
+  document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function
