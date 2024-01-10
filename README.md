@@ -30,15 +30,10 @@ Clocklyは以下の機能を持つ．
 ### Setup config files
 
   以下のコマンドを使用し，.env.exampleから.envをコピーする．
-  .envはGoogleCalendarAPIを使用するためのClient IDとClient Secretを格納する．
+  .envは外部のカレンダシステムと連携する際に必要となるOAuthのClient IDとClient Secretを格納する．
+  現在はGoogle Calendarとのみ連携可能であり，詳細は[Google Calendarとの連携](https://github.com/kimura3104/Clockly#google-calendar%E3%81%A8%E3%81%AE%E9%80%A3%E6%90%BA)で説明する．
   ```
   $ cp .env.example .env
-  ```
-
-  以下のコマンドを使用し，settings.yml.exampleからsettings.ymlをコピーする．
-  settings.ymlにはプログラムの自動実行を行うプログラムのリスト(auto_exec_program)およびプログラムで書き換え可能なカレンダのリスト(writable_calendar_id)が格納されている．
-  ```
-  $ cp settings.yml.example settings.yml
   ```
 
 ### Start Clockly
@@ -73,3 +68,12 @@ Clocklyは以下の画面をもつ．
   | /list       | プログラム一覧画面    この画面からプログラムの即時実行およびプログラムの自動実行を行える． |
   | /make       | プログラム作成画面    この画面からビジュアルプログラミングによるプログラムの作成を行える．        |
   | /settings   | 設定画面                                                                                   |
+
+# Development
+## Webページの開発
+Webページの開発をする際には`src/`以下にはWebページのソースコードが置いてある．
+
+
+### ビジュアルブロックの追加
+ビジュアルプログラミングで用いるブロックは`src/myblock.js`で定義されている．
+
