@@ -14,28 +14,41 @@ function UseBlockly(props) {
     //const [calendar_list, setCalendarList] = useState([]);
     const xml = `
         <xml id="toolbox">
-            <category name="カレンダ" colour="160" custom="CALENDAR_VARIABLE" >
+            <category name="カレンダ" colour="300" custom="CALENDAR_VARIABLE" >
             </category>
-            <category name="入出力" colour="160" >
-                <block type="get_events"></block>
+            <category name="カレンダ操作" colour="210" >
+                <block type="get_events" colour="230"></block>
+                <block type="insert_event1"></block>
+                <block type="insert_event2"></block>
+                <block type="update_event"></block>
+                <block type="delete_event">
+                    <value name="event">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">予定</field>
+                        </shadow>
+                    </value>
+                </block>
+            </category>
+            <category name="抽出" colour="180" >
+                <label text="絞り込み" web-class="myLabelStyle"></label>
                 <block type="filter"></block>
-                <block type="insert_event"></block>
-                <block type="print"></block>
-            </category>
-            <category name="編集" colour="160" >
-                <block type="map"></block>
-                <block type="property"></block>
-                <block type="replace"></block>
-                <block type="move"></block>
-            </category>
-            <category name="論理" colour="160" >
                 <block type="if"></block>
-                <block type="and"></block>
-                <block type="or"></block>
+                <label text="条件" web-class="myLabelStyle"></label>
                 <block type="match"></block>
                 <block type="date_match"></block>
+                <block type="time_match"></block>
+                <label text="結合" web-class="myLabelStyle"></label>
+                <block type="and"></block>
+                <block type="or"></block>
             </category>
-            <category name="日付" colour="160" >
+            <category name="加工" colour="240" >
+                <block type="map"></block>
+                <block type="map_output"></block>
+                <block type="replace"></block>
+                <block type="hide"></block>
+                <block type="move"></block>
+            </category>
+            <category name="日付" colour="120" >
                 <block type="year">
                     <value name="month">
                         <block type="month">
@@ -46,6 +59,12 @@ function UseBlockly(props) {
                     </value>
                 </block>
                 <block type="day"></block>
+                <block type="time"></block>
+            </category>
+            <category name="集計/表示" colour="60" >
+                <block type="print"></block>
+                <block type="total_hours"></block>
+                <block type="count"></block>
             </category>
         </xml>
     `;
