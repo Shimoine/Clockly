@@ -26,3 +26,6 @@ yarn-error.log*
 .env
 setting.yml
 /vendor
+db/
+token_store.yml
+settings.yml

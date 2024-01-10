@@ -1,6 +1,11 @@
 import Button from 'react-bootstrap/Button';
 
 function GoogleAuth() {
+    fetch( "http://localhost:4567/authorize")
+        .then( response => response.json() )
+        .then( json =>  {
+            window.location.href = json
+        });
 }
 
 function PageOfSettings() {
