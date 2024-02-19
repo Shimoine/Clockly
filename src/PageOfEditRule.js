@@ -40,7 +40,8 @@ function PageOfMakeRule(props) {
             name: name,
             blockXml: Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)),
             jsCode: Blockly.JavaScript.workspaceToCode(workspace),
-            rbCode: Blockly.Python.workspaceToCode(workspace)
+            rbCode: Blockly.Python.workspaceToCode(workspace),
+            enable_auto: false
         };
         fetch("/update_program", {
             method: "POST",

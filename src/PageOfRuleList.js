@@ -16,7 +16,8 @@ function PageOfRuleList() {
                         id: programs[i].id,
                         name: programs[i].name,
                         blockXml: programs[i].block,
-                        code: programs[i].code
+                        code: programs[i].code,
+                        enable_auto: programs[i].enable_auto
                     };
                     rule_list = [...rule_list, rule]
                 }

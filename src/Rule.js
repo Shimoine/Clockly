@@ -3,6 +3,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 //import Toggle from 'react-toggle'
 import Button from 'react-bootstrap/Button';
+import Toggle from 'react-toggle'
 import { BrowserRouter as Router, Route, Link, useNavigate } from 'react-router-dom';
 
 function Rule(props) {
@@ -90,9 +91,23 @@ function Rule(props) {
         })
     }
 
+    const enable_auto = (event) => {
+        var program = props.rule;
+        program.enable_auto = event.target.checked;
+        fetch("/update_program", {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(program)
+        })
+    }
+
     return (
         <Card style={{ width: '18rem' }}><Card.Body>
             <Card.Title><a>{props.rule.name}</a></Card.Title>
+            <Row>自動実行: <Col><Toggle defaultChecked={props.rule.enable_auto} onChange={enable_auto} /></Col></Row>
             <Row>
                 <Col><Button variant="outline-success" onClick={() => execution(props.rule.code)} >
                     実行

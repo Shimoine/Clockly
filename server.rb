@@ -160,6 +160,7 @@ post '/create_program' do
         "block" => "#{data['blockXml']}",
         "code" => "#{data['jsCode']}",
         "rbcode" => "#{data['rbCode']}",
+        "enable_auto" => "#{data['enable_auto']}",
     }
     programs << program
     file_store("program-repository.json", programs.to_json)
@@ -173,6 +174,7 @@ post '/update_program' do
         "block" => "#{data['blockXml']}",
         "code" => "#{data['jsCode']}",
         "rbcode" => "#{data['rbCode']}",
+        "enable_auto" => "#{data['enable_auto']}",
     }
     #return nil if programs = file_load("program-repository.json")
     programs = file_load("program-repository.json")
