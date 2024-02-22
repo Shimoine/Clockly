@@ -11,6 +11,8 @@ Dotenv.load
 
 enable :cross_origin
 
+set :public_folder, 'build'
+
 def file_load(key)
     settings_file_path = "settings.yml"
     config = YAML.load_file(settings_file_path) if File.exist?(settings_file_path)
@@ -219,4 +221,9 @@ post '/delete_program' do
         end
     end
     file_store("program-repository.json", programs.to_json)
+end
+
+get '/*' do
+    content_type 'text/html'
+    return File.read('./build/index.html')
 end
