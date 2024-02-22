@@ -16,7 +16,9 @@ function PageOfRuleList() {
                         id: programs[i].id,
                         name: programs[i].name,
                         blockXml: programs[i].block,
-                        code: programs[i].code,
+                        jsCode: programs[i].code,
+                        rbCode: programs[i].rbcode,
+                        calendar_id_list: programs[i].calendar_id_list,
                         enable_auto: programs[i].enable_auto
                     };
                     rule_list = [...rule_list, rule]

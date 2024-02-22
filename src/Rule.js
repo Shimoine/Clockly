@@ -65,6 +65,10 @@ function Rule(props) {
             window.alert(Array.isArray(value) ? value.join("\n") : value);
         }
 
+        const date_match = function (e, d, o) {
+            return new Date(e.date_time).getMonth() == 0;
+        }
+
         var fullcode = '(async () => {' + code + '})();';
         eval(fullcode);
     }
@@ -107,7 +111,7 @@ function Rule(props) {
     return (
         <Card style={{ width: '18rem' }}><Card.Body>
             <Card.Title><a>{props.rule.name}</a></Card.Title>
-            <Row>自動実行: <Col><Toggle defaultChecked={props.rule.enable_auto} onChange={enable_auto} /></Col></Row>
+            <Row>自動実行: <Col><Toggle defaultChecked={props.rule.enable_auto == 'true'} onChange={enable_auto} /></Col></Row>
             <Row>
                 <Col><Button variant="outline-success" onClick={() => execution(props.rule.code)} >
                     実行

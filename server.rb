@@ -49,8 +49,8 @@ end
 
 before do
     response.headers['Access-Control-Allow-Origin'] = '*'
-    settings_file_path = "settings.yml"
-    #config = YAML.load_file(settings_file_path) if File.exist?(settings_file_path)
+    @settings_file_path = "settings.yml"
+    @config = YAML.load_file(@settings_file_path) if File.exist?(@settings_file_path)
     #@db_path = config["db_path"]
 
     @client = Google::Apis::CalendarV3::CalendarService.new
@@ -69,9 +69,6 @@ get '/' do
 end
 
 get '/authorize' do
-    #credentials = authorizer.get_credentials(<email)
-    #@client.authorization = authorizer.credentials(config.default_user)
-    puts @authorizer.get_authorization_url
     return json @authorizer.get_authorization_url
 end
 
@@ -83,14 +80,32 @@ get '/auth/google_oauth2/callback' do
     redirect 'http://localhost:3000/settings'
 end
 
+post '/writable' do
+    data = JSON.parse(request.body.read)
+    writable_list = @config["writable_calendar_id"]
+    writable_list.delete(data['id'])
+    writable_list << data['id'] if !writable_list.include?(data['id']) if data['status']
+    @config["writable_calendar_id"] = writable_list
+    YAML.dump(@config, File.open(@settings_file_path, 'w'))
+end
+
 #####################################################
 # カレンダ管理部
 #####################################################
 
 # カレンダの取得機能
 get '/calendar_list' do
-    puts @client.list_calendar_lists().items.map{|e| e.summary}
-    return json @client.list_calendar_lists().items#.map{|e| e.summary}
+    writable_calendar_list = @config["writable_calendar_id"]
+    calendar_list = @client.list_calendar_lists().items.map do |calendar|
+        {
+            "summary" => calendar.summary,
+            "id" => calendar.id,
+            "writable" => writable_calendar_list.include?(calendar.id)
+        }
+    end
+    return json calendar_list
+    #puts @client.list_calendar_lists().items.map{|e| e.summary}
+    #return json @client.list_calendar_lists().items#.map{|e| e.summary}
 end
 
 get '/calendar/:id?' do
@@ -123,7 +138,9 @@ post '/insert_event' do
             date_time: event['end']['date_time']
         }
     )
-    @client.insert_event(calendar_id, google_event)
+    if @config["writable_calendar_id"].include?(calendar_id)
+        @client.insert_event(calendar_id, google_event)
+    end
 end
 
 post '/update_event' do
@@ -160,6 +177,7 @@ post '/create_program' do
         "block" => "#{data['blockXml']}",
         "code" => "#{data['jsCode']}",
         "rbcode" => "#{data['rbCode']}",
+        "calendar_id_list" => data['calendar_id_list'],
         "enable_auto" => "#{data['enable_auto']}",
     }
     programs << program
@@ -174,6 +192,7 @@ post '/update_program' do
         "block" => "#{data['blockXml']}",
         "code" => "#{data['jsCode']}",
         "rbcode" => "#{data['rbCode']}",
+        "calendar_id_list" => data['calendar_id_list'],
         "enable_auto" => "#{data['enable_auto']}",
     }
     #return nil if programs = file_load("program-repository.json")

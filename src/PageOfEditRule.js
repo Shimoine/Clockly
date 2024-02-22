@@ -35,12 +35,17 @@ function PageOfMakeRule(props) {
     const location = useLocation();
 
     const createRule = () => {
+        var code = Blockly.JavaScript.workspaceToCode(workspace);
+        var calendar_id_list = code.split('/*{*/').slice(1).map(e => {
+            return e.split('/*}*/')[0].split("'")[1];
+        });
         var xml = {
             id: location.state?.id,
             name: name,
             blockXml: Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)),
             jsCode: Blockly.JavaScript.workspaceToCode(workspace),
             rbCode: Blockly.Python.workspaceToCode(workspace),
+            calendar_id_list: calendar_id_list,
             enable_auto: false
         };
         fetch("/update_program", {
