@@ -6,7 +6,8 @@ require "google-apis-calendar_v3"
 require 'googleauth/stores/file_token_store'
 require 'dotenv/load'
 
-#@db_path = config["db_path"]
+DB_PATH = "./db/"
+
 Dotenv.load
 
 enable :cross_origin
@@ -14,22 +15,16 @@ enable :cross_origin
 set :public_folder, 'build'
 
 def file_load(key)
-    settings_file_path = "settings.yml"
-    config = YAML.load_file(settings_file_path) if File.exist?(settings_file_path)
-    db_path = config["db_path"]
     begin
-        File.read(db_path + key)
+        File.read(DB_PATH + key)
     rescue
         nil
     end
 end
 
 def file_store(key, value)
-    settings_file_path = "settings.yml"
-    config = YAML.load_file(settings_file_path) if File.exist?(settings_file_path)
-    db_path = config["db_path"]
     begin
-        File.write("#{db_path + key}", value)
+        File.write("#{DB_PATH + key}", value)
     rescue
         nil
     end
@@ -53,7 +48,6 @@ before do
     response.headers['Access-Control-Allow-Origin'] = '*'
     @settings_file_path = "settings.yml"
     @config = YAML.load_file(@settings_file_path) if File.exist?(@settings_file_path)
-    #@db_path = config["db_path"]
 
     @client = Google::Apis::CalendarV3::CalendarService.new
     @authorizer = Google::Auth::UserAuthorizer.new(
@@ -66,10 +60,6 @@ before do
     @client.authorization = @authorizer.get_credentials(ENV['DEFAULT_USER'])
 end
 
-get '/' do
-    "Hello! This is Clockly server"
-end
-
 get '/authorize' do
     return json @authorizer.get_authorization_url
 end
@@ -79,7 +69,7 @@ get '/auth/google_oauth2/callback' do
         user_id: ENV['DEFAULT_USER'],
         code: params[:code]
     )
-    redirect 'http://localhost:3000/settings'
+    redirect 'http://localhost:4567/settings'
 end
 
 post '/writable' do
@@ -106,8 +96,6 @@ get '/calendar_list' do
         }
     end
     return json calendar_list
-    #puts @client.list_calendar_lists().items.map{|e| e.summary}
-    #return json @client.list_calendar_lists().items#.map{|e| e.summary}
 end
 
 get '/calendar/:id?' do
@@ -197,7 +185,6 @@ post '/update_program' do
         "calendar_id_list" => data['calendar_id_list'],
         "enable_auto" => "#{data['enable_auto']}",
     }
-    #return nil if programs = file_load("program-repository.json")
     programs = file_load("program-repository.json")
     programs = JSON.parse(programs)
     programs.each_with_index do |program, i|

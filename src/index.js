@@ -1,9 +1,7 @@
 import React from 'react';
-//import ReactDOM from 'react-dom/client';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, Link, Switch, withRouter} from 'react-router-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 import MyNavbar from './MyNavbar';
@@ -15,8 +13,6 @@ import PageOfSettings from './PageOfSettings.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-//const root = ReactDOM.createRoot(document.getElementById('root'));
-//root.render(
 ReactDOM.render(
   <React.StrictMode>
     <MyNavbar/>

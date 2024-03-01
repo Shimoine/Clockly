@@ -1,11 +1,8 @@
 import { useEffect } from "react";
-//import Blockly, { ToolboxCategory } from "blockly";
 import React, { useState } from "react";
 import Blockly from './blockly_compressed';
-import './blocks_compressed.js';
 import './javascript_compressed.js';
 import './python_compressed.js';
-import './myblock.js';
 import './Blocks.js';
 
 var calendar_list = [];  // TODO: state を使う

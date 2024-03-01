@@ -1,7 +1,6 @@
 import Card from 'react-bootstrap/Card'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-//import Toggle from 'react-toggle'
 import Button from 'react-bootstrap/Button';
 import Toggle from 'react-toggle'
 import { BrowserRouter as Router, Route, Link, useNavigate } from 'react-router-dom';

@@ -1,37 +1,21 @@
-//import React, { Component } from 'react';
 import { useEffect, useState } from 'react';
 
 import { BrowserRouter as Router, Route, Link, useLocation } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 
 import Form from 'react-bootstrap/Form'
-//import Blockly from './blockly_compressed';
-//import UseBlockly from './UseBlockly'
-//import BigCalendar from 'react-big-calendar';
-//import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import UseBlockly from './UseBlockly'
 import Blockly from './blockly_compressed';
 
 import 'react-tabs/style/react-tabs.css';
 
-//import './PageOfMakeRule.css'
-
-//<UseBlockly setWorkspace={i => this.setWorkspace(i)} myBlockXml={this.state.blockxml} h="320px" w="1200px"/>
-//<pre><code>{this.state.jscode}</code></pre>
-//<pre><code>{this.state.rbcode}</code></pre>
-
 function PageOfMakeRule(props) {
-    console.log("dijasoidfjasiodj");
-    console.log(props);
     const [name, setName] = useState('');
     const [blockXml, setBlockXml] = useState(null);
     const [jsCode, setJsCode] = useState('');
     const [rbCode, setRbCode] = useState('');
     const [workspace, setWorkspace] = useState(null);
-    /*const setWorkspace = (workspace) => {
-
-    };*/
     const location = useLocation();
 
     const createRule = () => {
