@@ -2,6 +2,8 @@ require "google-apis-calendar_v3"
 require 'googleauth/stores/file_token_store'
 require 'dotenv/load'
 
+DB_PATH = "./db/"
+
 @client = Google::Apis::CalendarV3::CalendarService.new
 @authorizer = Google::Auth::UserAuthorizer.new(
     Google::Auth::ClientId.new(ENV['GOOGLE_CLIENT_ID'], ENV['GOOGLE_CLIENT_SECRET']), 
@@ -41,10 +43,10 @@ def insert_event(events, calendar_id)
         calendar_events = @client.list_events(calendar_id, single_events: true)
         event_id_list = calendar_events.items.map{|e| e.id}
         if event_id_list.include?(google_event.id)
-            #@client.update_event(calendar_id, google_event.id, google_event)
+            @client.update_event(calendar_id, google_event.id, google_event)
             STDERR.puts "Update #{event.summary} to #{calendar_id}"
         else
-            #@client.insert_event(calendar_id, google_event)
+            @client.insert_event(calendar_id, google_event)
             STDERR.puts "Insert #{event.summary} to #{calendar_id}"
         end
     end
@@ -52,8 +54,7 @@ end
 
 settings_file_path = "settings.yml"
 @config = YAML.load_file(settings_file_path) if File.exist?(settings_file_path)
-db_path = @config["db_path"]
-programs = JSON.parse(File.read(db_path + "program-repository.json"))
+programs = JSON.parse(File.read(DB_PATH + "program-repository.json"))
 etag_list = ARGV
 
 programs.each do |program|

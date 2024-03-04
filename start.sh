@@ -1,6 +1,7 @@
 #!/bin/sh
 
-echo -e "writable_calendar_id:\n-" > settings.yml
+echo writable_calendar_id: > settings.yml
+echo - >> settings.yml
 
 npm run build
 
