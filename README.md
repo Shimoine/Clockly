@@ -36,11 +36,24 @@ Clocklyは以下の機能を持つ．
   $ cp .env.example .env
   ```
 
+### Install packages
++ Gem のインストール
+  ```
+  $ bundle install
+  ```
++ package のインストール
+  ```
+  $ npm install
+  ```
+
 ### Start Clockly
 以下のコマンドを使用し，ClocklyのHTTPサーバを起動する．
   ```
-  bundle exec ruby server.rb
+  ./start.sh
   ```
+sinatraサーバがlocalhostで起動する．
+また，プログラムの自動実行スクリプトが実行される．
+自動実行スクリプトは60秒ごとにカレンダの更新を確認を行う．
 
 ## Google Calendarとの連携
   
@@ -48,12 +61,15 @@ Clocklyは以下の機能を持つ．
   ```
   1 GOOGLE_CLIENT_ID=XXXXXXXXXXXXXXXXXXXX
   2 GOOGLE_CLIENT_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  3 GOOGLE_CALLBACK_URL=http://localhost:4567/auth/google_oauth2/callback
+  4 TOKEN_STORE_PATH=./token_store.yml
+  5 DEFAULT_USER=default_user
   ```
 
 + .envファイルにGoogleCalendarAPIのClient ID, Client secretをそれぞれ入力する．
 + Googleの認証
   1. ブラウザからClocklyにアクセス(デフォルトは4567番ポート)
-  2. Settingsページに遷移し，「Googleと認証」ボタンを押下
+  2. メニューバーから「Settings」をクリックして，設定画面に遷移し「Googleと認証」ボタンを押下
   3. Googleの認証画面が表示されるので連携するアカウントのメールアドレスを入力
 
 # Usage
@@ -69,11 +85,26 @@ Clocklyは以下の画面をもつ．
   | /make       | プログラム作成画面    この画面からビジュアルプログラミングによるプログラムの作成を行える．        |
   | /settings   | 設定画面                                                                                   |
 
+### プログラムの作成
+1. メニューバーから「make rule」をクリックし，プログラム作成画面へ遷移
+2. 「ルール名」の項目にプログラムに付ける名前を入力
+3. 画面左側のツールボックスをクリックし，そこからブロックをドラッグアンドドロップで画面中央のワークスペースに配置し，ブロックを連結させプログラムを作成
+4. 「ルールを作成」ボタンを押し，プログラムを保存
+
+### プログラムの実行
+誤動作防止のため，カレンダの書き換えの可否を設定できる．
+書き換え不可のカレンダはプログラムが実行されても何も変更されない．
+
+1. 設定画面の「書き換え可能なカレンダ一覧」から書き換えるカレンダにチェックを入れる
+2. メニューバーから「list」をクリックし，プログラム一覧画面へ遷移
+3. 即時実行の場合は，実行したいプログラムの「実行」ボタンを押下
+4. 自動実行の場合は，自動実行を有効にしたいプログラムの「自動実行」にチェックを入れる
+
 # Development
 ## Webページの開発
 Webページの開発をする際には`src/`以下にはWebページのソースコードが置いてある．
 
 
 ### ビジュアルブロックの追加
-ビジュアルプログラミングで用いるブロックは`src/myblock.js`で定義されている．
+ビジュアルプログラミングで用いるブロックは`src/Block.js`で定義されている．
 
