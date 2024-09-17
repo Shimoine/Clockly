@@ -1,6 +1,8 @@
 require "google-apis-calendar_v3"
 require 'googleauth/stores/file_token_store'
 require 'dotenv/load'
+require 'json'
+require 'fileutils'
 
 DB_PATH = "./db/"
 
@@ -54,7 +56,16 @@ end
 
 settings_file_path = "settings.yml"
 @config = YAML.load_file(settings_file_path) if File.exist?(settings_file_path)
-programs = JSON.parse(File.read(DB_PATH + "program-repository.json"))
+
+# programs = JSON.parse(File.read(DB_PATH + "program-repository.json"))
+json_file_path = File.join(DB_PATH, "program-repository.json")
+unless File.exist?(json_file_path)
+  FileUtils.touch(json_file_path)
+  File.write(json_file_path, '[]')
+end
+file_content = File.read(json_file_path)
+programs = file_content.strip.empty? ? {} : JSON.parse(file_content)
+
 etag_list = ARGV
 
 programs.each do |program|

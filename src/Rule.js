@@ -65,7 +65,49 @@ function Rule(props) {
         }
 
         const date_match = function (e, d, o) {
-            return new Date(e.date_time).getMonth() == 0;
+            var event_date = new Date(e.date_time);
+            var dates = d.split("-");
+            var year = dates[0], month = dates[1], date = dates[2];
+            if(month == '00'){
+                if(date == '00'){
+                    month = '01';
+                    date = '01';
+                    dates = new Date(year + '-' + month + '-' + date).getFullYear();
+                    event_date = event_date.getFullYear();
+                    switch(o){
+                        case '==' :
+                            return event_date == dates;
+                        case '<=' :
+                            return event_date <= dates;
+                        case '>=' :
+                            return event_date >= dates;
+                    }
+                }
+                else{
+                    month = '01';
+                    dates = new Date(year + '-' + month + '-' + date).getMonth();
+                    event_date = event_date.getMonth();
+                    switch(o){
+                        case '==' :
+                            return event_date == dates;
+                        case '<=' :
+                            return event_date <= dates;
+                        case '>=' :
+                            return event_date >= dates;
+                    }
+                }
+            }
+            else{
+                dates = new Date(year + '-' + month + '-' + date)
+                switch(o){
+                    case '==' :
+                        return event_date == dates;
+                    case '<=' :
+                        return event_date <= dates;
+                    case '>=' :
+                        return event_date >= dates;
+                }
+            }
         }
 
         var fullcode = '(async () => {' + code + '})();';
@@ -107,13 +149,21 @@ function Rule(props) {
         })
     }
 
+    const test = (props) => {
+        alert("test2")
+        alert(props.rule.jsCode)
+    }
+
     return (
         <Card style={{ width: '18rem' }}><Card.Body>
             <Card.Title><a>{props.rule.name}</a></Card.Title>
             <Row>自動実行: <Col><Toggle defaultChecked={props.rule.enable_auto == 'true'} onChange={enable_auto} /></Col></Row>
             <Row>
-                <Col><Button variant="outline-success" onClick={() => execution(props.rule.code)} >
+                <Col><Button variant="outline-success" onClick={() => execution(props.rule.jsCode)} >
                     実行
+                </Button></Col>
+                <Col><Button variant="outline-success" onClick={() => test(props)} >
+                    test
                 </Button></Col>
                 <Col><Button variant="outline-success" onClick={() => edit(props.rule)} >
                     編集

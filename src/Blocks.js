@@ -549,7 +549,7 @@ Blockly.Blocks['match2'] = {
 
 Blockly.Blocks['date_match'] = {
     init: function() {
-        this.appendValueInput("date")
+        this.appendValueInput("dates")
             .setCheck(["year", "month", "date", "day"])
             .appendField(new Blockly.FieldDropdown([["開始日","start"], ["終了日","end"]]), "property")
             .appendField("が");
@@ -560,6 +560,37 @@ Blockly.Blocks['date_match'] = {
         this.setColour(180);
         this.setTooltip("");
         this.setHelpUrl("");
+        this.setOnChange(function(event) {
+            if (event.type === Blockly.Events.BLOCK_MOVE) {
+                // ブロックが移動されたときのみ処理する
+                var inputBlock = this.getInputTargetBlock('dates');
+                if (inputBlock && (inputBlock.type === 'month' || inputBlock.type === 'date')) {
+                    this.addGetEventBlock(inputBlock);
+                }
+            }
+        });
+    },
+
+    addGetEventBlock: function(dateBlock) {
+        // 新しいブロックを作成
+        var getYearBlock = this.workspace.newBlock('year');
+        var getMonthBlock = this.workspace.newBlock('month');
+        if(dateBlock.type == 'month') {
+        // 接続
+        getYearBlock.initSvg();  // 新しいブロックを初期化
+        getYearBlock.render();  // ブロックを描画
+        dateBlock.parentBlock_.getInput('dates').connection.connect(getYearBlock.outputConnection);  // year ブロックを先頭に接続
+        getYearBlock.getInput('dates').connection.connect(dateBlock.outputConnection); // month ブロックを接続
+        }
+        else if(dateBlock.type == 'date') {
+            getMonthBlock.initSvg();
+            getMonthBlock.render();
+            dateBlock.parentBlock_.getInput('dates').connection.connect(getMonthBlock.outputConnection);
+            getMonthBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
+        }
+        
+        var xml = Blockly.Xml.workspaceToDom(this.workspace);
+        Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, this.workspace);
     }
 };
 
@@ -597,7 +628,7 @@ Blockly.Blocks['year'] = {
     init: function() {
         this.appendValueInput("month")
             .setCheck("month")
-            .appendField(new Blockly.FieldNumber(2023, 1970, Infinity, 1), "year")
+            .appendField(new Blockly.FieldNumber(2024, 1970, Infinity, 1), "year")
             .appendField("年");
         this.setInputsInline(false);
         this.setOutput(true, "year");
@@ -825,36 +856,44 @@ Blockly.JavaScript['match2'] = function(block) {
 
 Blockly.JavaScript['date_match'] = function(block) {
     var property = block.getFieldValue('property');
-    var date = Blockly.JavaScript.valueToCode(block, 'date', Blockly.JavaScript.ORDER_ATOMIC);
     var operator = block.getFieldValue('operator');
-    var code = 'date_match(e.'+property+', '+ date + ', "' + operator + '")';
+    var dates = Blockly.JavaScript.valueToCode(block, 'dates', Blockly.JavaScript.ORDER_ATOMIC)
+    var code = 'date_match(e.'+property+', ' + '"' +dates+ '"' + ', "' + operator + '")';
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript['year'] = function(block) {
-    var month = Blockly.JavaScript.valueToCode(block, 'month', Blockly.JavaScript.ORDER_ATOMIC);
     var year = block.getFieldValue('year');
-    var code = '"Y' + year + 'Y"'
-    if(month != '')code += ' + ';
-    else code += '';
-    code += month;
-    return [code, Blockly.JavaScript.ORDER_NONE];
+    var month = Blockly.JavaScript.valueToCode(block, 'month', Blockly.JavaScript.ORDER_ATOMIC) || '00-00';
+    var code = year + '-' + month;
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript['month'] = function(block) {
-    var date = Blockly.JavaScript.valueToCode(block, 'date', Blockly.JavaScript.ORDER_ATOMIC);
+    var today = new Date();
+    var year = today.getFullYear();
     var month = block.getFieldValue('month');
-    var code = month + date;
-    code = '"M' + month + 'M"';// + date;
-    if(date != '')code += ' + ';
-    code += date;
+    var date = Blockly.JavaScript.valueToCode(block, 'date', Blockly.JavaScript.ORDER_ATOMIC) || '00';
+    var code = (month.length == 1 ? '0' + month : month) + '-' + date;
+    if(block.getParent() && block.getParent().type != 'year') {
+        code = year + '-' + code;
+    }
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript['date'] = function(block) {
-    var date = block.getFieldValue('date');
-    var code = date;
-    code = '"D' + date + 'D"';
+    var today = new Date();
+    var year = today.getFullYear();
+    var month = today.getMonth() + 1;
+    if(month < 10){
+        month = '0' + month;
+    }
+    var date = block.getFieldValue('date').toString();
+    var code = date.length == 1 ? '0' + date : date;
+
+    if(block.getParent() && block.getParent().type != 'month') {
+        code = year + '-' + month + '-' + code;
+    }
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
