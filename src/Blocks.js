@@ -561,9 +561,25 @@ Blockly.Blocks['date_match'] = {
         this.setTooltip("");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
-            if (event.type === Blockly.Events.BLOCK_MOVE) {
-                // ブロックが移動されたときのみ処理する
-                var inputBlock = this.getInputTargetBlock('dates');
+            var inputBlock = this.getInputTargetBlock('dates');
+            var dropdown = this.getField('operator');
+            var operatorField = this.getField('operator');
+            if (inputBlock && inputBlock.type !== 'year') {
+                operatorField.setValue('==');
+            } 
+            if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
+                if (inputBlock && inputBlock.type === 'year') {
+                    dropdown.menuGenerator_ = [
+                        ["である","=="], ["以降",">="], ["以前","<="]
+                    ];
+                } else {
+                    dropdown.menuGenerator_ = [
+                        ["である","=="]
+                    ];
+                    dropdown.setValue("==");
+                }
+
+                this.workspace.render();
                 if (inputBlock && (inputBlock.type === 'month' || inputBlock.type === 'date')) {
                     this.addGetEventBlock(inputBlock);
                 }
@@ -572,25 +588,21 @@ Blockly.Blocks['date_match'] = {
     },
 
     addGetEventBlock: function(dateBlock) {
-        // 新しいブロックを作成
-        var getYearBlock = this.workspace.newBlock('year');
-        var getMonthBlock = this.workspace.newBlock('month');
         if(dateBlock.type == 'month') {
-        // 接続
+        var getYearBlock = this.workspace.newBlock('specified_year');
         getYearBlock.initSvg();  // 新しいブロックを初期化
         getYearBlock.render();  // ブロックを描画
         dateBlock.parentBlock_.getInput('dates').connection.connect(getYearBlock.outputConnection);  // year ブロックを先頭に接続
         getYearBlock.getInput('dates').connection.connect(dateBlock.outputConnection); // month ブロックを接続
         }
         else if(dateBlock.type == 'date') {
+            var getMonthBlock = this.workspace.newBlock('specified_month');
             getMonthBlock.initSvg();
             getMonthBlock.render();
             dateBlock.parentBlock_.getInput('dates').connection.connect(getMonthBlock.outputConnection);
             getMonthBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
         }
-        
-        var xml = Blockly.Xml.workspaceToDom(this.workspace);
-        Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, this.workspace);
+        this.workspace.render();
     }
 };
 
@@ -680,6 +692,92 @@ Blockly.Blocks['day'] = {
         this.setHelpUrl("");
     }
 };
+
+Blockly.Blocks['specified_year'] = {
+    init: function() {
+        this.appendValueInput("month")
+            .setCheck("month")
+            .appendField(new Blockly.FieldDropdown([
+                ["今年","0"], ["来年","1"], ["去年","2"]
+            ]), "year");
+        this.setInputsInline(false);
+        this.setOutput(true, "year");
+        this.setColour(120);
+        this.setTooltip("");
+        this.setHelpUrl("");
+        this.setOnChange(function(event) {
+            var monthConnection = this.getInputTargetBlock('month');
+            var dropdown = this.getField('year');
+            if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
+                if (monthConnection) {
+                // monthブロックが接続されている場合のドロップダウン変更
+                    dropdown.menuGenerator_ = [
+                        ["今年の","0"], ["来年の","1"], ["去年の","2"]
+                    ];
+                } else {
+                // 何も接続されていない場合のドロップダウン内容
+                    dropdown.menuGenerator_ = [
+                        ["今年","0"], ["来年","1"], ["去年","2"]
+                    ];
+                }
+                dropdown.setValue(dropdown.getValue());
+                this.workspace.render();  // ワークスペースを再描画
+                // Blockly.Events.enable();
+            }
+        });
+    }
+};
+
+Blockly.Blocks['specified_month'] = {
+    init: function() {
+        this.appendValueInput("date")
+            .setCheck("date")
+            .appendField(new Blockly.FieldDropdown([
+                ["今月","0"], ["来月","1"], ["先月","2"]
+            ]), "month");
+        this.setInputsInline(false);
+        this.setOutput(true, "month");
+        this.setColour(120);
+        this.setTooltip("");
+        this.setHelpUrl("");
+        this.setOnChange(function(event) {
+            var dateConnection = this.getInputTargetBlock('date');
+            var dropdown = this.getField('month');
+            if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
+                if (dateConnection) {
+                // dateブロックが接続されている場合のドロップダウン変更
+                    dropdown.menuGenerator_ = [
+                        ["今月の","0"], ["来月の","1"], ["先月の","2"]
+                    ];
+                } else {
+                // 何も接続されていない場合のドロップダウン内容
+                    dropdown.menuGenerator_ = [
+                        ["今月","0"], ["来月","1"], ["先月","2"]
+                    ];
+                }
+                dropdown.setValue(dropdown.getValue());
+                this.workspace.render();  // ワークスペースを再描画
+                // Blockly.Events.enable();
+            }
+        });
+    }
+};
+
+Blockly.Blocks['specified_date'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown([
+                ["今日","0"], ["明日","1"], ["昨日","2"]
+            ]), "date");
+        this.setInputsInline(false);
+        this.setOutput(true, "date");
+        this.setColour(120);
+        this.setTooltip("");
+        this.setHelpUrl("");
+    }
+};
+
+
 
 Blockly.Blocks['time'] = {
     init: function() {
@@ -897,6 +995,25 @@ Blockly.JavaScript['date'] = function(block) {
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
+Blockly.JavaScript['specified_year'] = function(block) {
+    var date = block.getFieldValue('year');
+    var code = date;
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+}
+
+Blockly.JavaScript['specified_month'] = function(block) {
+    var date = block.getFieldValue('month');
+    var code = date;
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+}
+
+Blockly.JavaScript['specified_date'] = function(block) {
+    var date = block.getFieldValue('date');
+    var code = date;
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+}
+
+
 Blockly.JavaScript['day'] = function(block) {
     var day = block.getFieldValue('day');
     var code = day;
@@ -1062,6 +1179,24 @@ Blockly.Python['month'] = function(block) {
 };
 
 Blockly.Python['date'] = function(block) {
+    var date = block.getFieldValue('date');
+    var code = date;
+    return [code, Blockly.Python.ORDER_ATOMIC];
+};
+
+Blockly.Python['specified_year'] = function(block) {
+    var date = block.getFieldValue('year');
+    var code = date;
+    return [code, Blockly.Python.ORDER_ATOMIC];
+};
+
+Blockly.Python['specified_month'] = function(block) {
+    var date = block.getFieldValue('month');
+    var code = date;
+    return [code, Blockly.Python.ORDER_ATOMIC];
+};
+
+Blockly.Python['specified_date'] = function(block) {
     var date = block.getFieldValue('date');
     var code = date;
     return [code, Blockly.Python.ORDER_ATOMIC];

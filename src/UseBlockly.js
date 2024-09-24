@@ -55,6 +55,9 @@ function UseBlockly(props) {
                         </block>
                     </value>
                 </block>
+                <block type="specified_year"></block>
+                <block type="specified_month"></block>
+                <block type="specified_date"></block>
                 <block type="day"></block>
                 <block type="time"></block>
             </category>

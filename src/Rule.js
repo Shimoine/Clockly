@@ -150,7 +150,7 @@ function Rule(props) {
     }
 
     const test = (props) => {
-        alert("test2")
+        alert("test1")
         alert(props.rule.jsCode)
     }
 
