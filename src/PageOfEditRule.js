@@ -55,7 +55,11 @@ function PageOfMakeRule(props) {
     useEffect(() => {
         setName(location.state?.name);
         setBlockXml(location.state?.block);
-    }, []);
+        if (workspace && blockXml) {
+            const dom = Blockly.Xml.textToDom(blockXml);
+            Blockly.Xml.clearWorkspaceAndLoadFromXml(dom, workspace);
+        }
+    }, [location.state?.block, workspace]);
 
     return (
         <div>
