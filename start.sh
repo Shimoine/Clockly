@@ -7,4 +7,8 @@ npm run build
 
 bundle exec ruby server.rb &
 
+SERVER_PID=$!
+sleep 3
+xdg-open http://localhost:4567 &
+
 ./auto_exec.sh
