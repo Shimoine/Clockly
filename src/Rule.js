@@ -64,52 +64,157 @@ function Rule(props) {
             window.alert(Array.isArray(value) ? value.join("\n") : value);
         }
 
-        const date_match = function (e, d, o) {
-            var event_date = new Date(e.date_time);
-            var dates = d.split("-");
-            var year = dates[0], month = dates[1], date = dates[2];
-            if(month == '00'){
-                if(date == '00'){
-                    month = '01';
-                    date = '01';
-                    dates = new Date(year + '-' + month + '-' + date).getFullYear();
-                    event_date = event_date.getFullYear();
-                    switch(o){
-                        case '==' :
-                            return event_date == dates;
-                        case '<=' :
-                            return event_date <= dates;
-                        case '>=' :
-                            return event_date >= dates;
-                    }
-                }
-                else{
-                    month = '01';
-                    dates = new Date(year + '-' + month + '-' + date).getMonth();
-                    event_date = event_date.getMonth();
-                    switch(o){
-                        case '==' :
-                            return event_date == dates;
-                        case '<=' :
-                            return event_date <= dates;
-                        case '>=' :
-                            return event_date >= dates;
-                    }
-                }
+        const normalize_date = function (y,m,d,w,dw){
+            var dates = {};
+            var year, month, date, day;
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            dates.type = 'date';
+            switch(d){
+                case 'today':
+                    dates.start = today;
+                    break;
+                case 'tomorrow':
+                    var tomorrow = new Date(today);
+                    tomorrow.setDate(today.getDate() + 1);
+                    dates.start = tomorrow;
+                    break;
+                case 'yesterday':
+                    var yesterday = new Date(today);
+                    yesterday.setDate(today.getDate() - 1);
+                    dates.start = yesterday;
+                    break;
+                case 'undefined':
+                    dates.type = 'month';
+                    break;
+                default:
+                    date = d;
+                    break;
             }
-            else{
-                dates = new Date(year + '-' + month + '-' + date)
+            switch(m){
+                case 'this_month':
+                    year = today.getFullYear();
+                    month = today.getMonth() + 1;
+                    break;
+                case 'next_month':
+                    if(today.getMonth() == 11){
+                        year = today.getFullYear() + 1;
+                        month = 1;
+                    }else{
+                        year = today.getFullYear();
+                        month = today.getMonth() + 2;
+                    }
+                    break;
+                case 'last_month':
+                    if(today.getMonth() == 0){
+                        year = today.getFullYear() - 1;
+                        month = 12;
+                    }else{
+                        year = today.getFullYear();
+                        month = today.getMonth();
+                    }
+                    break;
+                case 'undefined':
+                    dates.type = 'year';
+                    break;
+                default:
+                    month = m;
+                    break;
+            }
+            switch(y){
+                case 'this_year':
+                    year = today.getFullYear();
+                    break;
+                case 'next_year':
+                    year = today.getFullYear() + 1;
+                    break;
+                case 'last_year':
+                    year = today.getFullYear() - 1;
+                    break;
+                case 'undefined':
+                    break;
+                default:
+                    year = y;
+                    break;
+            }
+            switch(w){
+                case 'this_week':
+                    var day = today.getDay();
+                    dates.type = 'week';
+                    dates.start = new Date(today);
+                    dates.start.setDate(today.getDate() - day);
+                    dates.end = new Date(dates.start);
+                    dates.end.setDate(dates.start.getDate() + 7);
+                    break;
+                case 'next_week':
+                    var day = today.getDay();
+                    dates.start = new Date(today);
+                    dates.type = 'week';
+                    dates.start.setDate(today.getDate() - day + 7);
+                    dates.end = new Date(dates.start);
+                    dates.end.setDate(dates.start.getDate() + 7);
+                    break;
+                case 'last_week':
+                    var day = today.getDay();
+                    dates.start = new Date(today);
+                    dates.type = 'week';
+                    dates.start.setDate(today.getDate() - day - 7);
+                    dates.end = new Date(dates.start);
+                    dates.end.setDate(dates.start.getDate() + 7);
+                    break;
+                default:
+                    break;
+            }
+            if(dw != 'undefined'){
+                dates.day = Number(dw);
+            }
+            switch(dates.type){
+                case 'date':
+                    dates.start = new Date(year, month - 1, date);
+                    break;
+                case 'month':
+                    dates.start = new Date(year, month - 1, 1);
+                    dates.end = new Date(year, month, 1);
+                    break;
+                case 'year':
+                    dates.start = new Date(year, 0, 1);
+                    dates.end = new Date(Number(year) + 1, 0, 1);
+                    break;
+                default:
+                    break;
+            }
+            return dates;
+        }
+
+        const date_match = function (e, d, o) {
+            var event_dates = new Date(e.date_time);
+            var event_year = event_dates.getFullYear();
+            var event_month = event_dates.getMonth() + 1;
+            var event_date = event_dates.getDate();
+            var start_dates = d.start;
+            var end_dates = d.end;
+
+            // window.alert(d.type + " " + start_dates + " " + end_dates);
+
+            if(isNaN(end_dates)){ //end_dateが存在しないとき
                 switch(o){
-                    case '==' :
-                        return event_date == dates;
-                    case '<=' :
-                        return event_date <= dates;
-                    case '>=' :
-                        return event_date >= dates;
+                    case '==':
+                        return event_year == start_dates.getFullYear() && event_month == start_dates.getMonth() + 1 && event_date == start_dates.getDate();
+                    case '<=':
+                        start_dates.setDate(start_dates.getDate() + 1);
+                        return event_dates <= start_dates;
+                    case '>=':
+                        return event_dates >= start_dates;
+                }
+            }else{
+                if(isNaN(d.day)){
+                    return event_dates >= start_dates && event_dates < end_dates;
+                }else{
+                    return event_dates >= start_dates && event_dates < end_dates && event_dates.getDay() == d.day;
                 }
             }
         }
-
+        
         var fullcode = '(async () => {' + code + '})();';
         eval(fullcode);
     }

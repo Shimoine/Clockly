@@ -46,6 +46,7 @@ function UseBlockly(props) {
                 <block type="move"></block>
             </category>
             <category name="日付" colour="120" >
+                <label text="日付" web-class="myLabelStyle"></label>
                 <block type="year">
                     <value name="month">
                         <block type="month">
@@ -57,8 +58,10 @@ function UseBlockly(props) {
                 </block>
                 <block type="specified_year"></block>
                 <block type="specified_month"></block>
+                <block type="specified_week"></block>
                 <block type="specified_date"></block>
                 <block type="day"></block>
+                <label text="時刻" web-class="myLabelStyle"></label>
                 <block type="time"></block>
             </category>
             <category name="集計/表示" colour="60" >

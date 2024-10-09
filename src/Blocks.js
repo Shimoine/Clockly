@@ -550,7 +550,7 @@ Blockly.Blocks['match2'] = {
 Blockly.Blocks['date_match'] = {
     init: function() {
         this.appendValueInput("dates")
-            .setCheck(["year", "month", "date", "day"])
+            .setCheck(["year", "month", "week", "date", "day"])
             .appendField(new Blockly.FieldDropdown([["開始日","start"], ["終了日","end"]]), "property")
             .appendField("が");
         this.appendDummyInput()
@@ -563,22 +563,45 @@ Blockly.Blocks['date_match'] = {
         this.setOnChange(function(event) {
             var inputBlock = this.getInputTargetBlock('dates');
             var dropdown = this.getField('operator');
-            var operatorField = this.getField('operator');
-            if (inputBlock && inputBlock.type !== 'year') {
-                operatorField.setValue('==');
-            } 
             if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
-                if (inputBlock && inputBlock.type === 'year') {
-                    dropdown.menuGenerator_ = [
-                        ["である","=="], ["以降",">="], ["以前","<="]
-                    ];
-                } else {
-                    dropdown.menuGenerator_ = [
-                        ["である","=="]
-                    ];
-                    dropdown.setValue("==");
+                if (inputBlock) {
+                    var monthBlock = inputBlock.getInputTargetBlock('month');
+                    var dateBlock = monthBlock ? monthBlock.getInputTargetBlock('date') : null;
+                    
+                    switch (inputBlock.type) {
+                        case 'year':
+                            if (monthBlock && dateBlock) {
+                                dropdown.menuGenerator_ = [["である", "=="], ["以降", ">="], ["以前", "<="]];
+                            }else {
+                                dropdown.menuGenerator_ = [["である", "=="]];
+                                dropdown.setValue("==");
+                            }
+                            break;
+                        case 'specified_year':
+                            if (monthBlock && dateBlock) {
+                                dropdown.menuGenerator_ = [["である", "=="], ["以降", ">="], ["以前", "<="]];
+                            }else {
+                                dropdown.menuGenerator_ = [["である", "=="]];
+                                dropdown.setValue("==");
+                            }
+                            break;
+                        case 'specified_month':
+                            if (dateBlock) {
+                                dropdown.menuGenerator_ = [["である", "=="], ["以降", ">="], ["以前", "<="]];
+                            }else {
+                                dropdown.menuGenerator_ = [["である", "=="]];
+                                dropdown.setValue("==");
+                            }
+                            break;
+                        case 'specified_date':
+                            dropdown.menuGenerator_ = [["である", "=="], ["以降", ">="], ["以前", "<="]];
+                            break;
+                        default:
+                            dropdown.menuGenerator_ = [["である", "=="]];
+                            dropdown.setValue("==");
+                            break;
+                    }
                 }
-
                 this.workspace.render();
                 if (inputBlock && (inputBlock.type === 'month' || inputBlock.type === 'date')) {
                     this.addGetEventBlock(inputBlock);
@@ -601,6 +624,13 @@ Blockly.Blocks['date_match'] = {
             getMonthBlock.render();
             dateBlock.parentBlock_.getInput('dates').connection.connect(getMonthBlock.outputConnection);
             getMonthBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
+        }
+        else if(dateBlock.type == 'day') {
+            var getWeekBlock = this.workspace.newBlock('specified_week');
+            getWeekBlock.initSvg();
+            getWeekBlock.render();
+            dateBlock.parentBlock_.getInput('dates').connection.connect(getWeekBlock.outputConnection);
+            getWeekBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
         }
         this.workspace.render();
     }
@@ -653,7 +683,7 @@ Blockly.Blocks['year'] = {
 Blockly.Blocks['month'] = {
     init: function() {
         this.appendValueInput("date")
-            .setCheck("date")
+            .setCheck(["date", "day"])
             .appendField(new Blockly.FieldDropdown([
                 ["1月","1"], ["2月","2"], ["3月","3"], ["4月","4"], ["5月","5"], ["6月","6"], 
                 ["7月","7"], ["8月","8"], ["9月","9"], ["10月","10"], ["11月","11"], ["12月","12"]
@@ -698,7 +728,7 @@ Blockly.Blocks['specified_year'] = {
         this.appendValueInput("month")
             .setCheck("month")
             .appendField(new Blockly.FieldDropdown([
-                ["今年","0"], ["来年","1"], ["去年","2"]
+                ["今年","this_year"], ["来年","next_year"], ["去年","last_year"]
             ]), "year");
         this.setInputsInline(false);
         this.setOutput(true, "year");
@@ -712,12 +742,12 @@ Blockly.Blocks['specified_year'] = {
                 if (monthConnection) {
                 // monthブロックが接続されている場合のドロップダウン変更
                     dropdown.menuGenerator_ = [
-                        ["今年の","0"], ["来年の","1"], ["去年の","2"]
+                        ["今年の","this_year"], ["来年の","next_year"], ["去年の","last_year"]
                     ];
                 } else {
                 // 何も接続されていない場合のドロップダウン内容
                     dropdown.menuGenerator_ = [
-                        ["今年","0"], ["来年","1"], ["去年","2"]
+                        ["今年","this_year"], ["来年","next_year"], ["去年","last_year"]
                     ];
                 }
                 dropdown.setValue(dropdown.getValue());
@@ -731,9 +761,9 @@ Blockly.Blocks['specified_year'] = {
 Blockly.Blocks['specified_month'] = {
     init: function() {
         this.appendValueInput("date")
-            .setCheck("date")
+            .setCheck(["date", "day"])
             .appendField(new Blockly.FieldDropdown([
-                ["今月","0"], ["来月","1"], ["先月","2"]
+                ["今月","this_month"], ["来月","next_month"], ["先月","last_month"]
             ]), "month");
         this.setInputsInline(false);
         this.setOutput(true, "month");
@@ -747,12 +777,47 @@ Blockly.Blocks['specified_month'] = {
                 if (dateConnection) {
                 // dateブロックが接続されている場合のドロップダウン変更
                     dropdown.menuGenerator_ = [
-                        ["今月の","0"], ["来月の","1"], ["先月の","2"]
+                        ["今月の","this_month"], ["来月の","next_month"], ["先月の","last_month"]
                     ];
                 } else {
                 // 何も接続されていない場合のドロップダウン内容
                     dropdown.menuGenerator_ = [
-                        ["今月","0"], ["来月","1"], ["先月","2"]
+                        ["今月","this_month"], ["来月","next_month"], ["先月","last_month"]
+                    ];
+                }
+                dropdown.setValue(dropdown.getValue());
+                this.workspace.render();  // ワークスペースを再描画
+                // Blockly.Events.enable();
+            }
+        });
+    }
+};
+
+Blockly.Blocks['specified_week'] = {
+    init: function() {
+        this.appendValueInput("day")
+            .setCheck("day")
+            .appendField(new Blockly.FieldDropdown([
+                ["今週","this_week"], ["来週","next_week"], ["先週","last_week"]
+            ]), "week");
+        this.setInputsInline(false);
+        this.setOutput(true, "week");
+        this.setColour(120);
+        this.setTooltip("");
+        this.setHelpUrl("");
+        this.setOnChange(function(event) {
+            var dayConnection = this.getInputTargetBlock('day');
+            var dropdown = this.getField('week');
+            if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
+                if (dayConnection) {
+                // monthブロックが接続されている場合のドロップダウン変更
+                    dropdown.menuGenerator_ = [
+                        ["今週の","this_week"], ["来週の","next_week"], ["先週の","last_week"]
+                    ];
+                } else {
+                // 何も接続されていない場合のドロップダウン内容
+                    dropdown.menuGenerator_ = [
+                        ["今週","this_week"], ["来週","next_week"], ["先週","last_week"]
                     ];
                 }
                 dropdown.setValue(dropdown.getValue());
@@ -767,7 +832,7 @@ Blockly.Blocks['specified_date'] = {
     init: function() {
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown([
-                ["今日","0"], ["明日","1"], ["昨日","2"]
+                ["今日","today"], ["明日","tomorrow"], ["昨日","yesterday"]
             ]), "date");
         this.setInputsInline(false);
         this.setOutput(true, "date");
@@ -955,68 +1020,88 @@ Blockly.JavaScript['match2'] = function(block) {
 Blockly.JavaScript['date_match'] = function(block) {
     var property = block.getFieldValue('property');
     var operator = block.getFieldValue('operator');
-    var dates = Blockly.JavaScript.valueToCode(block, 'dates', Blockly.JavaScript.ORDER_ATOMIC)
-    var code = 'date_match(e.'+property+', ' + '"' +dates+ '"' + ', "' + operator + '")';
+    var dates = Blockly.JavaScript.valueToCode(block, 'dates', Blockly.JavaScript.ORDER_ATOMIC);
+    var year = (dates.match(/Y([a-z_]+|\d{4})/) || [])[1];
+    var month = (dates.match(/M([a-z_]+|\d{2})/) || [])[1];
+    var date = (dates.match(/D([a-z_]+|\d{2})/) || [])[1];
+    var week = (dates.match(/W([a-z_]+|\d{1})/) || [])[1];
+    var day = (dates.match(/DAY([a-z_]+|\d{1})/) || [])[1];
+    var code = 'date_match(e.'+property+', normalize_date("'+ year + '","' + month + '","' + date + '","' + week + '","' + day +'"), "' + operator + '")';
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript['year'] = function(block) {
     var year = block.getFieldValue('year');
-    var month = Blockly.JavaScript.valueToCode(block, 'month', Blockly.JavaScript.ORDER_ATOMIC) || '00-00';
-    var code = year + '-' + month;
+    var month = Blockly.JavaScript.valueToCode(block, 'month', Blockly.JavaScript.ORDER_ATOMIC) || null;
+    var code = 'Y' +year;
+    if(month) {
+        code = code + month;
+    }
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript['month'] = function(block) {
-    var today = new Date();
-    var year = today.getFullYear();
     var month = block.getFieldValue('month');
-    var date = Blockly.JavaScript.valueToCode(block, 'date', Blockly.JavaScript.ORDER_ATOMIC) || '00';
-    var code = (month.length == 1 ? '0' + month : month) + '-' + date;
-    if(block.getParent() && block.getParent().type != 'year') {
-        code = year + '-' + code;
+    var date = Blockly.JavaScript.valueToCode(block, 'date', Blockly.JavaScript.ORDER_ATOMIC) || null;
+    var day = Blockly.JavaScript.valueToCode(block, 'day', Blockly.JavaScript.ORDER_ATOMIC) || null;
+    var code = 'M' + (month.length == 1 ? '0' + month : month);
+    if(date) {
+        code = code + date;
+    }else if(day) {
+        code = code + day;
     }
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript['date'] = function(block) {
-    var today = new Date();
-    var year = today.getFullYear();
-    var month = today.getMonth() + 1;
-    if(month < 10){
-        month = '0' + month;
-    }
     var date = block.getFieldValue('date').toString();
-    var code = date.length == 1 ? '0' + date : date;
-
-    if(block.getParent() && block.getParent().type != 'month') {
-        code = year + '-' + month + '-' + code;
-    }
+    var code = 'D' + (date.length == 1 ? '0' + date : date);
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript['specified_year'] = function(block) {
-    var date = block.getFieldValue('year');
-    var code = date;
+    var year = block.getFieldValue('year');
+    var month = Blockly.JavaScript.valueToCode(block, 'month', Blockly.JavaScript.ORDER_ATOMIC) || null;
+    var code = 'Y' + year;
+    if(month) {
+        code = code + month;
+    }
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 }
 
 Blockly.JavaScript['specified_month'] = function(block) {
-    var date = block.getFieldValue('month');
-    var code = date;
+    var month = block.getFieldValue('month');
+    var date = Blockly.JavaScript.valueToCode(block, 'date', Blockly.JavaScript.ORDER_ATOMIC) || null;
+    var day = Blockly.JavaScript.valueToCode(block, 'day', Blockly.JavaScript.ORDER_ATOMIC) || null;
+    var code = 'M' + month;
+    if(date) {
+        code = code + date;
+    }else if(day) {
+        code = code + day;
+    }
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+}
+
+Blockly.JavaScript['specified_week'] = function(block) {
+    var week = block.getFieldValue('week');
+    var day = Blockly.JavaScript.valueToCode(block, 'day', Blockly.JavaScript.ORDER_ATOMIC) || null;
+    var code = 'W' + week;
+    if(day) {
+        code = code + day;
+    }
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 }
 
 Blockly.JavaScript['specified_date'] = function(block) {
     var date = block.getFieldValue('date');
-    var code = date;
+    var code = 'D'+ date;
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 }
 
 
 Blockly.JavaScript['day'] = function(block) {
     var day = block.getFieldValue('day');
-    var code = day;
+    var code = 'DAY' + day;
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
@@ -1192,6 +1277,12 @@ Blockly.Python['specified_year'] = function(block) {
 
 Blockly.Python['specified_month'] = function(block) {
     var date = block.getFieldValue('month');
+    var code = date;
+    return [code, Blockly.Python.ORDER_ATOMIC];
+};
+
+Blockly.Python['specified_week'] = function(block) {
+    var date = block.getFieldValue('date');
     var code = date;
     return [code, Blockly.Python.ORDER_ATOMIC];
 };

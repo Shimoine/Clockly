@@ -99,9 +99,30 @@ get '/calendar_list' do
 end
 
 get '/calendar/:id?' do
-    puts @client.list_events(params["id"], single_events: true)
-    return @client.list_events(params["id"], single_events: true).to_h.to_json
+    puts @client.list_events(params["id"], single_events: true, max_results: 2500)
+    return @client.list_events(params["id"], single_events: true, max_results: 2500).to_h.to_json
 end
+
+# get '/calendar/:id?' do
+#     calendar_id = params["id"]
+#     all_events = []
+#     page_token = nil
+
+#     begin
+#         result = @client.list_events(calendar_id, 
+#                                      single_events: true, 
+#                                      max_results: 2500, 
+#                                      page_token: page_token) # ページごとの取得
+#         puts "----------------"
+#         puts result
+#         puts "----------------"
+#         all_events.concat(result.items) # イベントを追加
+#         page_token = result.next_page_token # 次のページがある場合はtoken取得
+#     end while page_token != nil
+
+#     return json all_events.map(&:to_h) # 全イベントを返す
+# end
+
 
 # カレンダの更新機能
 post '/create_calendar' do
