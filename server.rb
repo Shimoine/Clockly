@@ -99,30 +99,38 @@ get '/calendar_list' do
 end
 
 get '/calendar/:id?' do
-    puts @client.list_events(params["id"], single_events: true, max_results: 2500)
-    return @client.list_events(params["id"], single_events: true, max_results: 2500).to_h.to_json
-end
+    events = []
+    page_token = nil
+    calendar_meta = {}
+  
+    begin
+      response = @client.list_events(
+        params["id"],
+        single_events: true,
+        max_results: 2500,
+        page_token: page_token
+      )
+      
+      # 初回のリクエストでカレンダーのメタ情報を保存 
+      if page_token.nil?
+        calendar_meta = {
+          access_role: response.access_role,
+          default_reminders: response.default_reminders,
+          description: response.description,
+          etag: response.etag,
+          summary: response.summary
+        }
+      end
 
-# get '/calendar/:id?' do
-#     calendar_id = params["id"]
-#     all_events = []
-#     page_token = nil
+      events.concat(response.items.map(&:to_h))
+      page_token = response.next_page_token
+    end while page_token
 
-#     begin
-#         result = @client.list_events(calendar_id, 
-#                                      single_events: true, 
-#                                      max_results: 2500, 
-#                                      page_token: page_token) # ページごとの取得
-#         puts "----------------"
-#         puts result
-#         puts "----------------"
-#         all_events.concat(result.items) # イベントを追加
-#         page_token = result.next_page_token # 次のページがある場合はtoken取得
-#     end while page_token != nil
+    full_response = calendar_meta.merge({items: events}).to_json
 
-#     return json all_events.map(&:to_h) # 全イベントを返す
-# end
-
+    return full_response
+  end
+  
 
 # カレンダの更新機能
 post '/create_calendar' do
