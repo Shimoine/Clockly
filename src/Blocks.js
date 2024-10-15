@@ -637,31 +637,18 @@ Blockly.Blocks['date_match'] = {
 };
 
 Blockly.Blocks['time_match'] = {
-    validate: function(newValue) {
-        this.getSourceBlock().updateConnections(newValue);
-        return newValue;
-    },
-
     init: function() {
         this.appendValueInput("time")
             .setCheck("time")
             .appendField(new Blockly.FieldDropdown([["開始時刻","start"], ["終了時刻","end"]]), "property")
             .appendField("が");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([["である","=="], ["以降",">="], ["以前","<="], ["~","~"]],this.validate), "item")
+            .appendField(new Blockly.FieldDropdown([["である","=="], ["以降",">="], ["以前","<="]]), "operator")
         this.setInputsInline(true);
         this.setOutput(true, "Boolean");
         this.setColour(180);
         this.setTooltip("");
         this.setHelpUrl("");
-    },
-
-    updateConnections: function(newValue) {
-        this.removeInput('end', true);  
-        if(newValue == '~') {
-            this.appendValueInput('end')
-                .setCheck("time");
-        }
     }
 };
 
@@ -852,7 +839,7 @@ Blockly.Blocks['time'] = {
             .appendField(new Blockly.FieldNumber(0, 0, 59, 1), "minute")
             .appendField("分");
         this.setInputsInline(false);
-        this.setOutput(true, "date");
+        this.setOutput(true, "time");
         this.setColour(120);
         this.setTooltip("");
         this.setHelpUrl("");
@@ -1017,6 +1004,14 @@ Blockly.JavaScript['match2'] = function(block) {
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
+Blockly.JavaScript['time_match'] = function(block) {
+    var property = block.getFieldValue('property');
+    var operator = block.getFieldValue('operator');
+    var time = Blockly.JavaScript.valueToCode(block, 'time', Blockly.JavaScript.ORDER_ATOMIC);
+    var code = 'time_match(e.'+property+', "'+time+'", "'+operator+'")';
+    return [code, Blockly.JavaScript.ORDER_NONE];
+}
+
 Blockly.JavaScript['date_match'] = function(block) {
     var property = block.getFieldValue('property');
     var operator = block.getFieldValue('operator');
@@ -1102,6 +1097,13 @@ Blockly.JavaScript['specified_date'] = function(block) {
 Blockly.JavaScript['day'] = function(block) {
     var day = block.getFieldValue('day');
     var code = 'DAY' + day;
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
+Blockly.JavaScript['time'] = function(block) {
+    var hour = block.getFieldValue('hour');
+    var minute = block.getFieldValue('minute');
+    var code = Number(hour) * 60 + Number(minute);
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
@@ -1240,6 +1242,13 @@ Blockly.Python['match2'] = function(block) {
     return [code, Blockly.Python.ORDER_NONE];
 };
 
+Blockly.Python['time_match'] = function(block) {
+    var property = block.getFieldValue('property');
+    var text = block.getFieldValue('text');
+    var code = 'e.'+property+'.match(/'+text+'/)';
+    return [code, Blockly.Python.ORDER_NONE];
+};
+
 Blockly.Python['date_match'] = function(block) {
     var property = block.getFieldValue('property');
     var text = block.getFieldValue('text');
@@ -1298,6 +1307,13 @@ Blockly.Python['day'] = function(block) {
     var code = day;
     return [code, Blockly.Python.ORDER_ATOMIC];
 };
+
+Blockly.Python['time'] = function(block) {
+    var hour = block.getFieldValue('hour');
+    var minute = block.getFieldValue('minute');
+    var code = hour + ':' + minute;
+    return [code, Blockly.Python.ORDER_ATOMIC];
+}
 
 Blockly.Python['total_hours'] = function(block) {
     var events = Blockly.Python.valueToCode(block, 'event', Blockly.JavaScript.ORDER_ATOMIC);

@@ -215,6 +215,23 @@ function Rule(props) {
             }
         }
         
+        const time_match = function (e, t, o) {
+            var event_dates = new Date(e.date_time);
+            var event_hour = event_dates.getHours();
+            var event_minute = event_dates.getMinutes();
+            var event_time = event_hour * 60 + event_minute;
+            switch(o){
+                case '==':
+                    return event_time == t;
+                case '<=':
+                    return event_time <= t;
+                case '>=':
+                    return event_time >= t;
+                default:
+                    return false;
+            }
+        }
+
         var fullcode = '(async () => {' + code + '})();';
         eval(fullcode);
     }
