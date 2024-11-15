@@ -8,7 +8,8 @@ npm run build
 bundle exec ruby server.rb &
 
 SERVER_PID=$!
-sleep 3
+sleep 1
 xdg-open http://localhost:4567 &
+nodemon &
 
 ./auto_exec.sh

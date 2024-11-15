@@ -4,6 +4,7 @@ import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button';
 import Toggle from 'react-toggle'
 import { BrowserRouter as Router, Route, Link, useNavigate } from 'react-router-dom';
+import e from 'express';
 
 function Rule(props) {
     const navigate = useNavigate();
@@ -33,6 +34,97 @@ function Rule(props) {
                     body: JSON.stringify(eventjson)
                 })
             });
+        }
+
+        const update_event = async function (source_event , target_event, calendar_id){
+            try {
+                var source_events = source_event ? (Array.isArray(source_event) ? source_event : [source_event]) : [];
+                var target_events = target_event ? (Array.isArray(target_event) ? target_event : [target_event]) : [];
+
+
+                const getEventId = (event) => event.id;
+
+                const compareEvents = (source, target) => {
+                    const sourceUpdatedTime = new Date(source.updated).getTime();
+                    const targetUpdatedTime = new Date(target.updated).getTime();
+                    const targetCreatedTime = new Date(target.created).getTime();
+
+                    return sourceUpdatedTime > targetUpdatedTime && sourceUpdatedTime > targetCreatedTime;
+                }
+                
+                if (source_events.length > 0) {
+                    for (let source of source_events) {
+                        if (target_events.length > 0) {
+                            const targetMatch = target_event.find(target => getEventId(target) === getEventId(source));
+                            if (!targetMatch) {
+                                await insert_event(source, calendar_id);
+                                var eventjson = {calendar_id: calendar_id,event: source};
+                                fetch("/insert_event", {
+                                    method: "POST",
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(eventjson)
+                                })
+                            } else if (compareEvents(source, targetMatch)) {
+                                var eventjson = {calendar_id: calendar_id, event_id: target_event.id, event: source};
+                                fetch("/update_event", {
+                                    method: "POST",
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(eventjson)
+                                })
+                            }
+                        }else{
+                            var eventjson = {calendar_id: calendar_id,event: source};
+                            fetch("/insert_event", {
+                                method: "POST",
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(eventjson)
+                            })
+                        }
+                    }
+                }
+
+                if(target_events.length > 0){
+                    for (let target of target_events) {
+                        if(source_events.length > 0){
+                            const sourceMatch = source_event.find(source => getEventId(source) === getEventId(target));
+                            
+                            if (!sourceMatch) {
+                                var eventjson = {calendar_id: calendar_id,event_id: target.id};
+                                fetch("/delete_event", {
+                                    method: "POST",
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(eventjson)
+                                })                    
+                            }
+                        }
+                        else{
+                            var eventjson = {calendar_id: calendar_id,event_id: target.id};
+                            fetch("/delete_event", {
+                                method: "POST",
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(eventjson)
+                            })                    
+                        }
+                    }
+                }
+            }catch (e) {
+                alert(e);
+            }
         }
 
         const delete_event = async function (source_event,calendar_id){
@@ -69,26 +161,26 @@ function Rule(props) {
             var year, month, date, day;
             var today = new Date();
             today.setHours(0, 0, 0, 0);
-            dates.type = 'date';
             switch(d){
                 case 'today':
                     dates.start = today;
-                    break;
+                    return dates;
                 case 'tomorrow':
                     var tomorrow = new Date(today);
                     tomorrow.setDate(today.getDate() + 1);
                     dates.start = tomorrow;
-                    break;
+                    return dates;
                 case 'yesterday':
                     var yesterday = new Date(today);
                     yesterday.setDate(today.getDate() - 1);
                     dates.start = yesterday;
-                    break;
+                    return dates;
                 case 'undefined':
                     dates.type = 'month';
                     break;
                 default:
                     date = d;
+                    dates.type = 'date';
                     break;
             }
             switch(m){
@@ -232,6 +324,10 @@ function Rule(props) {
             }
         }
 
+        const test_print = function (source_event){
+            window.alert(source_event.id);
+        }
+
         var fullcode = '(async () => {' + code + '})();';
         eval(fullcode);
     }
@@ -271,30 +367,31 @@ function Rule(props) {
         })
     }
 
-    const test = (props) => {
-        alert("test1")
-        alert(props.rule.jsCode)
+    const prev = (props) => {
+
     }
 
     return (
-        <Card style={{ width: '18rem' }}><Card.Body>
-            <Card.Title><a>{props.rule.name}</a></Card.Title>
-            <Row>自動実行: <Col><Toggle defaultChecked={props.rule.enable_auto == 'true'} onChange={enable_auto} /></Col></Row>
-            <Row>
-                <Col><Button variant="outline-success" onClick={() => execution(props.rule.jsCode)} >
-                    実行
-                </Button></Col>
-                <Col><Button variant="outline-success" onClick={() => test(props)} >
-                    test
-                </Button></Col>
-                <Col><Button variant="outline-success" onClick={() => edit(props.rule)} >
-                    編集
-                </Button></Col>
-                <Col><Button variant="danger" onClick={() => remove(props.rule.id)} >
-                    ×
-                </Button></Col>
-            </Row>
-        </Card.Body></Card>
+        <Col>
+            <Card style={{ width: '18rem' }}><Card.Body>
+                <Card.Title><a>{props.rule.name}</a></Card.Title>
+                <Row>自動実行: <Col><Toggle defaultChecked={props.rule.enable_auto == 'true'} onChange={enable_auto} /></Col></Row>
+                <Row>
+                    <Col><Button variant="outline-success" onClick={() => execution(props.rule.jsCode)} >
+                        実行
+                    </Button></Col>
+                    <Col><Button variant="outline-success" onClick={() => prev(props.rule)} >
+                        preview
+                    </Button></Col>
+                    <Col><Button variant="outline-success" onClick={() => edit(props.rule)} >
+                        編集
+                    </Button></Col>
+                    <Col><Button variant="danger" onClick={() => remove(props.rule.id)} >
+                        ×
+                    </Button></Col>
+                </Row>
+            </Card.Body></Card>
+        </Col>
     );
 }
 export default Rule;

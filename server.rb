@@ -131,6 +131,10 @@ get '/calendar/:id?' do
     return full_response
   end
   
+get '/get_writable' do
+    writable_list = @config["writable_calendar_id"]
+    return json writable_list
+end
 
 # カレンダの更新機能
 post '/create_calendar' do
@@ -145,9 +149,12 @@ post '/insert_event' do
     event = data['event']
     puts event['start']['date']
     puts event['start']['date_time']
+    puts "id: #{event['id']}"
     google_event = Google::Apis::CalendarV3::Event.new(
+        id: event['id'],
         summary: event['summary'],
         location: event['location'],
+        description: event['description'],
         start: {
             date: event['start']['date'],
             date_time: event['start']['date_time']
@@ -162,14 +169,36 @@ post '/insert_event' do
     end
 end
 
-post '/update_event' do
-end
+# post '/update_event' do
+#     data = JSON.parse(request.body.read)
+#     calendar_id = data['calendar_id']
+#     event = data['event']
+    
+#     google_event = Google::Apis::CalendarV3::Event.new(
+#         id: event['id'],
+#         summary: event['summary'],
+#         location: event['location'],
+#         start: {
+#             date: event['start']['date'],
+#             date_time: event['start']['date_time']
+#         },
+#         end: {
+#             date: event['end']['date'],
+#             date_time: event['end']['date_time']
+#         }
+#     )
+#     if @config["writable_calendar_id"].include?(calendar_id)
+#         @client.update_event(calendar_id, event['id'], google_event)
+#     end
+# end
 
 post '/delete_event' do
     data = JSON.parse(request.body.read)
     calendar_id = data['calendar_id']
     event_id = data['event_id']
-    @client.delete_event(calendar_id, event_id)
+    if @config["writable_calendar_id"].include?(calendar_id)
+        @client.delete_event(calendar_id, event_id)
+    end
 end
 
 #####################################################

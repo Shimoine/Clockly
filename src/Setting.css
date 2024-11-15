@@ -1,0 +1,36 @@
+.settings-container {
+    max-width: 800px;
+    margin-left: 0;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+}
+
+.auth-section {
+    margin-bottom: 20px;
+}
+
+.calendar-section {
+    margin-top: 20px;
+}
+
+.calendar-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 15px; /* 行間隔を調整 */
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.calendar-name {
+    margin-left: 10px; /* 左側の余白 */
+    font-size: 16px;
+}
+
+.spacing {
+    margin: 5px;
+    margin-left: 5px;
+}
