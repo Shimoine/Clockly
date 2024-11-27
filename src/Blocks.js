@@ -21,6 +21,8 @@ date: 日
 day: 曜日
 */
 
+
+
 /* ブロックXML */
 
 Blockly.Blocks['dummy_value'] = {
@@ -32,7 +34,20 @@ Blockly.Blocks['dummy_value'] = {
         this.setHelpUrl("");
     }
 };
+
+Blockly.Blocks['dummy_statement'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldLabelSerializable(""), "text");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip("");
+        this.setHelpUrl("");
+    }
+};
+
 /* カレンダブロック */
+
 Blockly.Blocks['calendar'] = {
     init: function() {
         this.appendDummyInput()
@@ -227,6 +242,49 @@ Blockly.Blocks['map'] = {
         this.workspace.render();
     }
 };
+
+
+Blockly.Blocks['map_test'] = {
+    init: function() {
+        this.appendValueInput("events")
+            .setCheck(["Calendar", "Event"]);
+        this.appendDummyInput()
+            .appendField("の各予定について");
+        this.appendStatementInput("statement")
+            .setCheck("map");
+        this.setInputsInline(true);
+        this.appendDummyInput()
+            .appendField("を施して");
+        this.appendValueInput("calendar")
+            .setCheck("Calendar");
+        this.appendDummyInput()
+            .appendField("に追加");
+        //this.setPreviousStatement(true, null);
+        //this.setNextStatement(true, null);
+        this.setColour(30);
+        this.setTooltip("");
+        this.setHelpUrl("");
+        this.setOnChange(function(event) {
+            if (event.type === Blockly.Events.BLOCK_MOVE) {
+                // ブロックが移動されたときのみ処理する
+                var inputBlock = this.getInputTargetBlock('events');
+                if (inputBlock && inputBlock.type === 'calendar') {
+                    // 接続されたブロックが calendar ブロックの場合
+                    this.addGetEventBlock(inputBlock);
+                }
+            }
+        });
+    },
+
+    addGetEventBlock: function(calendarBlock) {
+        var getEventBlock = this.workspace.newBlock('get_events');
+        getEventBlock.initSvg();  // 新しいブロックを初期化
+        getEventBlock.render();  // ブロックを描画
+        calendarBlock.parentBlock_.getInput('events').connection.connect(getEventBlock.outputConnection); 
+        this.workspace.render();
+    }
+};
+
 Blockly.Blocks['map_output'] = {
     init: function() {
         this.appendValueInput("events")
@@ -261,6 +319,42 @@ Blockly.Blocks['map_output'] = {
     }
 };
 
+
+Blockly.Blocks['map_output_test'] = {
+    init: function() {
+        this.appendValueInput("events")
+            .setCheck(["Calendar", "Event"]);
+        this.appendDummyInput()
+            .appendField("の各予定について");
+        this.appendStatementInput("statement")
+            .setCheck("map");
+        this.setInputsInline(true);
+        this.appendDummyInput()
+            .appendField("を施した予定");
+        this.setOutput(true, "Event");
+        this.setColour(0);
+        this.setTooltip("");
+        this.setHelpUrl("");
+        this.setOnChange(function(event) {
+            if (event.type === Blockly.Events.BLOCK_MOVE) {
+                // ブロックが移動されたときのみ処理する
+                var inputBlock = this.getInputTargetBlock('events');
+                if (inputBlock && inputBlock.type === 'calendar') {
+                    // 接続されたブロックが calendar ブロックの場合
+                    this.addGetEventBlock(inputBlock);
+                }
+            }
+        });
+    },
+
+    addGetEventBlock: function(calendarBlock) {
+        var getEventBlock = this.workspace.newBlock('get_events');
+        getEventBlock.initSvg();  // 新しいブロックを初期化
+        getEventBlock.render();  // ブロックを描画
+        calendarBlock.parentBlock_.getInput('events').connection.connect(getEventBlock.outputConnection); 
+        this.workspace.render();
+    }
+};
 
 /* filter */
 Blockly.Blocks['filter'] = {
@@ -1012,12 +1106,28 @@ Blockly.JavaScript['map'] = function(block) {
     return code;
 };
 
+Blockly.JavaScript['map_test'] = function(block) {
+    var events = Blockly.JavaScript.valueToCode(block, 'events', Blockly.JavaScript.ORDER_ATOMIC);
+    var statement = Blockly.JavaScript.statementToCode(block, 'statement');
+    var calendar = Blockly.JavaScript.valueToCode(block, 'calendar', Blockly.JavaScript.ORDER_ATOMIC);
+    var code = 'var event = '+events+'.map(async function(e) {\n'+statement+'});\n await insert_event(event, '+calendar+')\n';
+    return code;
+};
+
 Blockly.JavaScript['map_output'] = function(block) {
     var events = Blockly.JavaScript.valueToCode(block, 'events', Blockly.JavaScript.ORDER_ATOMIC);
     var statement = Blockly.JavaScript.statementToCode(block, 'statement');
     var code = ''+events+'.map(async function(e) {\n' + statement + '\nreturn e;});\n';
     return code;
 };
+
+Blockly.JavaScript['map_output_test'] = function(block) {
+    var events = Blockly.JavaScript.valueToCode(block, 'events', Blockly.JavaScript.ORDER_ATOMIC);
+    var statement = Blockly.JavaScript.statementToCode(block, 'statement');
+    var code = ''+events+'.map(async function(e) {\n' + statement + '\nreturn e;});\n';
+    return code;
+};
+
 
 Blockly.JavaScript['filter'] = function(block) {
     var events = Blockly.JavaScript.valueToCode(block, 'events', Blockly.JavaScript.ORDER_ATOMIC);
@@ -1309,7 +1419,21 @@ Blockly.Python['map'] = function(block) {
     return code;
 };
 
+Blockly.Python['map_test'] = function(block) {
+    var events = Blockly.Python.valueToCode(block, 'events', Blockly.Python.ORDER_ATOMIC);
+    var statement = Blockly.Python.statementToCode(block, 'statement');
+    var code = events+ '.each do |e|\n'+statement+'end\n';
+    return code;
+};
+
 Blockly.Python['map_output'] = function(block) {
+    var events = Blockly.Python.valueToCode(block, 'events', Blockly.Python.ORDER_ATOMIC);
+    var statement = Blockly.Python.statementToCode(block, 'statement');
+    var code = events+ '.each do |e|\n'+statement+'end\n';
+    return code;
+};
+
+Blockly.Python['map_output_test'] = function(block) {
     var events = Blockly.Python.valueToCode(block, 'events', Blockly.Python.ORDER_ATOMIC);
     var statement = Blockly.Python.statementToCode(block, 'statement');
     var code = events+ '.each do |e|\n'+statement+'end\n';

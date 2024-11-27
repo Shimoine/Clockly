@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Link, useLocation } from 'react-router-
 import Button from 'react-bootstrap/Button';
 
 import Form from 'react-bootstrap/Form'
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import UseBlockly from './UseBlockly'
 import Blockly from './blockly_compressed';
 
@@ -13,12 +12,14 @@ import 'react-tabs/style/react-tabs.css';
 function PageOfMakeRule(props) {
     const [name, setName] = useState('');
     const [blockXml, setBlockXml] = useState(null);
-    const [jsCode, setJsCode] = useState('');
-    const [rbCode, setRbCode] = useState('');
     const [workspace, setWorkspace] = useState(null);
     const location = useLocation();
 
     const createRule = () => {
+        try{
+            if (!workspace) {
+                throw new Error("Workspace is not initialized.");
+            }
         var code = Blockly.JavaScript.workspaceToCode(workspace);
         var calendar_id_list = code.split('/*{*/').slice(1).map(e => {
             return e.split('/*}*/')[0].split("'")[1];
@@ -40,21 +41,20 @@ function PageOfMakeRule(props) {
             },
             body: JSON.stringify(xml)
         })
+    }catch(e){
+        console.log(e);
+        alert(e);
+    }
     }
 
     const handleNameChange = (event) => {
         setName(event.target.value);
     }
 
-    const tab_select = () => {
-        setBlockXml(Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)))
-        setJsCode(Blockly.JavaScript.workspaceToCode(workspace))
-        setRbCode(Blockly.Python.workspaceToCode(workspace))
-    }
-
     useEffect(() => {
         setBlockXml(location.state?.block);
     }, []);
+
 
     return (
         <div>
@@ -62,23 +62,7 @@ function PageOfMakeRule(props) {
 
             ルール名: <Form.Control defaultValue={location.state?.name} placeholder="" onChange = {handleNameChange}/>
             <p/>
-
-            <Tabs onSelect={tab_select}>
-                <TabList>
-                    <Tab>Blockly</Tab>
-                    <Tab>JavaScript</Tab>
-                    <Tab>Ruby</Tab>
-                </TabList>
-                <TabPanel>
-                    <UseBlockly h={400} w={1200} setWorkspace={i => setWorkspace(i)} blockXml={blockXml}/>
-                </TabPanel>
-                <TabPanel>
-                    <pre><code>{jsCode}</code></pre>
-                </TabPanel>
-                <TabPanel>
-                    <pre><code>{rbCode}</code></pre>
-                </TabPanel>
-            </Tabs>
+                <UseBlockly h={400} w={1200} setWorkspace={setWorkspace} blockXml={blockXml} setBlockXml={setBlockXml}/>
             <p/>
             <Link to="/list">
                 <Button variant="outline-success" onClick={createRule}>

@@ -68,7 +68,7 @@ function PageOfMakeRule(props) {
             ルール名: <Form.Control defaultValue={location.state?.name} placeholder="" onChange = {handleNameChange}/>
             <p/>
 
-            <Tabs onSelect={tab_select}>
+            {/* <Tabs onSelect={tab_select}>
                 <TabList>
                     <Tab>Blockly</Tab>
                     <Tab>JavaScript</Tab>
@@ -84,6 +84,13 @@ function PageOfMakeRule(props) {
                     <pre><code>{rbCode}</code></pre>
                 </TabPanel>
             </Tabs>
+            <p/>
+            <Link to="/list">
+                <Button variant="outline-success" onClick={createRule}>
+                    ルールを変更
+                </Button>
+            </Link> */}
+                <UseBlockly h={400} w={1200} setWorkspace={setWorkspace} blockXml={blockXml} setBlockXml={setBlockXml}/>
             <p/>
             <Link to="/list">
                 <Button variant="outline-success" onClick={createRule}>

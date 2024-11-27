@@ -8,13 +8,21 @@ import './Blocks.js';
 var calendar_list = [];  // TODO: state を使う
 
 function UseBlockly(props) {
+    // const [workspace, setWorkspace] = useState(null);
     //const [calendar_list, setCalendarList] = useState([]);
     const xml = `
         <xml id="toolbox">
             <category name="カレンダ" colour="300" custom="CALENDAR_VARIABLE" >
             </category>
+
             <category name="カレンダ操作" colour="210" >
-                <block type="get_events" colour="230"></block>
+                <block type="get_events" colour="230">
+                    <value name="calendar">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">カレンダ</field>
+                        </shadow>
+                    </value>
+                </block>
                 <block type="insert_event">
                     <value name="event">
                         <shadow type="dummy_value" colour="230">
@@ -27,12 +35,39 @@ function UseBlockly(props) {
                         </shadow>
                     </value>
                 </block>
-                <block type="insert_event2"></block>
-                <block type="update_event"></block>
+                <block type="insert_event2">
+                    <value name="calendar">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">カレンダ</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="update_event">
+                    <value name="calendar1">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">カレンダ</field>
+                        </shadow>
+                    </value>
+                    <value name="calendar2">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">カレンダ</field>
+                        </shadow>
+                    </value>
+                </block>
                 <block type="delete_event">
-
+                    <value name="event">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">予定</field>
+                        </shadow>
+                    </value>
+                    <value name="calendar">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">カレンダ</field>
+                        </shadow>
+                    </value>
                 </block>
             </category>
+
             <category name="抽出" colour="180" >
                 <label text="絞り込み" web-class="myLabelStyle"></label>
                 <block type="filter">
@@ -47,10 +82,27 @@ function UseBlockly(props) {
                         </shadow>
                     </value>
                 </block>
-                <block type="if"></block>
+                <block type="if">
+                    <value name="condition">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">条件</field>
+                        </shadow>
+                    </value>
+                    <value name="statement">
+                        <shadow type="dummy_statement" colour="230">
+                            <field name="text">処理</field>
+                        </shadow>
+                    </value>
+                </block>
                 <label text="条件" web-class="myLabelStyle"></label>
                 <block type="match"></block>
-                <block type="date_match"></block>
+                <block type="date_match">
+                    <value name="dates">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">日付</field>
+                        </shadow>
+                    </value>
+                </block>
                 <block type="time_match">
                     <value name="time">
                         <shadow type="dummy_value" colour="230">
@@ -59,25 +111,73 @@ function UseBlockly(props) {
                     </value>
                 </block>
                 <label text="結合" web-class="myLabelStyle"></label>
-                <block type="and"></block>
-                <block type="or"></block>
+                <block type="and">
+                    <value name="value1">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">条件1</field>
+                        </shadow>
+                    </value>
+                    <value name="value2">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">条件2</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="or">
+                    <value name="value1">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">条件1</field>
+                        </shadow>
+                    </value>
+                    <value name="value2">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">条件2</field>
+                        </shadow>
+                    </value>
+                </block>
             </category>
+
             <category name="加工" colour="240" >
-                <block type="map"></block>
-                <block type="map_output"></block>
-                <block type="replace_name"></block>
-                <block type="replace_date"></block>
-                <block type="replace_time"></block>
-                <block type="hide"></block>
-                <block type="hide_test">
+                <block type="map_test">
+                    <value name="events">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">予定</field>
+                        </shadow>
+                    </value>
+                    <value name="statement">
+                        <shadow type="dummy_statement" colour="230">
+                            <field name="text">絞り込みや加工処理</field>
+                        </shadow>
+                    </value>
                     <value name="calendar">
                         <shadow type="dummy_value" colour="230">
                             <field name="text">カレンダ</field>
                         </shadow>
                     </value>
                 </block>
-                <block type="move"></block>
+                <block type="map_output_test">
+                    <value name="events">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">予定</field>
+                        </shadow>
+                    </value>
+                    <value name="statement">
+                        <shadow type="dummy_statement" colour="230">
+                            <field name="text">絞り込みや加工処理</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="replace_name"></block>
+                <block type="hide"></block>
+                <block type="move">
+                    <value name="date">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">日付</field>
+                        </shadow>
+                    </value>
+                </block>
             </category>
+
             <category name="日付" colour="120" >
                 <label text="日付" web-class="myLabelStyle"></label>
                 <block type="year">
@@ -97,10 +197,22 @@ function UseBlockly(props) {
                 <label text="時刻" web-class="myLabelStyle"></label>
                 <block type="time"></block>
             </category>
+
             <category name="集計/表示" colour="60" >
-                <block type="print"></block>
-                <block type="test_print"></block>
-                <block type="total_hours"></block>
+                <block type="print">
+                    <value name="value">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">データ</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="total_hours">
+                    <value name="events">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">予定</field>
+                        </shadow>
+                    </value>
+                </block>
                 <block type="total_events">
                     <value name="events">
                         <shadow type="dummy_value" colour="230">
@@ -148,6 +260,77 @@ function UseBlockly(props) {
         });
     }
 
+    // const registerContextMenuItem = (id, weight, ScopeType ,displayText ,callback) => {
+    //     console.log(Blockly.ContextMenuRegistry.registry);
+    //     const isMenuItemRegistered = Object.values(Blockly.ContextMenuRegistry.registry.registry_).some(item => item.id === id);
+
+    //     if (!isMenuItemRegistered) {
+    //         Blockly.ContextMenuRegistry.registry.register({
+    //             id: id,
+    //             weight: weight,
+    //             scopeType: ScopeType,
+    //             displayText: displayText,
+    //             preconditionFn: function () {
+    //                 return 'enabled';
+    //             },
+    //             callback: callback
+    //         });
+    //     }
+    // };
+
+    // const startBlockly = () => {
+    //     const workspace = Blockly.inject("blocklyDiv", {
+    //         toolbox: xmlDom.getElementById("toolbox"),
+    //     });
+    //     setWorkspace(workspace);
+
+    //     if (props.blockXml != null) {
+    //         const blockXmlDom = Blockly.Xml.textToDom(props.blockXml);
+    //         Blockly.Xml.domToWorkspace(blockXmlDom, workspace);
+    //     }
+        
+    //     RegisterCalendar(workspace);
+
+        // registerContextMenuItem(
+        //     'copy_block',
+        //     200,
+        //     Blockly.ContextMenuRegistry.ScopeType.BLOCK,
+        //     'コピー',
+        //     (scope) => Blockly.clipboard.copy(scope.block)
+        // );
+
+        // registerContextMenuItem(
+        //     'paste_block',
+        //     300,
+        //     Blockly.ContextMenuRegistry.ScopeType.WORKSPACE,
+        //     '貼り付け',
+        //     () => Blockly.clipboard.paste()
+        // );
+
+        // registerContextMenuItem(
+        //     'Hello',
+        //     400,
+        //     Blockly.ContextMenuRegistry.ScopeType.WORKSPACE,
+        //     'Hello',
+        //     () => console.log('Hello')
+        // );
+
+        // return () => {
+        //     const itemsToUnregister = ['copy_block', 'paste_block', 'Hello'];
+        //     // const itemsToUnregister = ['Hello'];
+        //     itemsToUnregister.forEach(id => {
+        //         const item = Object.values(Blockly.ContextMenuRegistry.registry.registry_).some(item => item.id === id);
+        //         if (item) {
+        //             Blockly.ContextMenuRegistry.registry.unregister(item);
+        //         }
+        //     });
+        // };
+    // }
+
+    // useEffect(() => {
+    //    startBlockly();
+    // }, []);
+
     useEffect(() => {
         var workspace = Blockly.inject("blocklyDiv", {
             toolbox: xmlDom.getElementById("toolbox")
@@ -161,7 +344,6 @@ function UseBlockly(props) {
         RegisterCalendar(workspace);
     }, []);
 
-    
     return (
         <div>
             <div id="blocklyDiv" style={{height: props.h, width: props.w}}></div>
