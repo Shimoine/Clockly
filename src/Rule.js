@@ -3,10 +3,24 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button';
 import Toggle from 'react-toggle'
+import React, { useState } from 'react';
+import { useEffect } from "react";
+import Blockly from './blockly_compressed';
 import { BrowserRouter as Router, Route, Link, useNavigate } from 'react-router-dom';
-import e from 'express';
+//import e from 'express';
+
+function CustomToggle({ checked, onChange }) {
+    return (
+        <label className="switch">
+            <input type="checkbox" checked={checked} onChange={onChange} />
+            <span className="slider"></span>
+        </label>
+    );
+}   
 
 function Rule(props) {
+    const { rule, onRemove } = props;
+    const [previewXml, setPreviewXml] = useState('');
     const navigate = useNavigate();
     const execution = (code) => {
         console.log(code)
@@ -24,15 +38,17 @@ function Rule(props) {
             var events = source_event;
             if (!Array.isArray(source_event)) events = [source_event];
             await events.forEach(event => {
-                var eventjson = {calendar_id: calendar_id,event: event};
-                fetch("/insert_event", {
-                    method: "POST",
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(eventjson)
-                })
+                if(event.status != "cancelled"){
+                    var eventjson = {calendar_id: calendar_id,event: event};
+                    fetch("/insert_event", {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(eventjson)
+                    })
+                }
             });
         }
 
@@ -55,9 +71,11 @@ function Rule(props) {
                 if (source_events.length > 0) {
                     for (let source of source_events) {
                         if (target_events.length > 0) {
-                            const targetMatch = target_event.find(target => getEventId(target) === getEventId(source));
+                            const targetMatch = target_events.find(target => getEventId(target) === getEventId(source));
+                            alert(targetMatch);
+                            alert(compareEvents(source, targetMatch));
+                            alert(targetMatch.status);
                             if (!targetMatch) {
-                                await insert_event(source, calendar_id);
                                 var eventjson = {calendar_id: calendar_id,event: source};
                                 fetch("/insert_event", {
                                     method: "POST",
@@ -67,16 +85,18 @@ function Rule(props) {
                                     },
                                     body: JSON.stringify(eventjson)
                                 })
-                            } else if (compareEvents(source, targetMatch)) {
-                                var eventjson = {calendar_id: calendar_id, event_id: target_event.id, event: source};
-                                fetch("/update_event", {
-                                    method: "POST",
-                                    headers: {
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify(eventjson)
-                                })
+                            } else{
+                                if(targetMatch.status == "cancelled" || compareEvents(source, targetMatch)){
+                                    var eventjson = {calendar_id: calendar_id, event_id: target_event.id, event: source};
+                                    fetch("/update_event", {
+                                        method: "POST",
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(eventjson)
+                                    })
+                                }
                             }
                         }else{
                             var eventjson = {calendar_id: calendar_id,event: source};
@@ -95,8 +115,7 @@ function Rule(props) {
                 if(target_events.length > 0){
                     for (let target of target_events) {
                         if(source_events.length > 0){
-                            const sourceMatch = source_event.find(source => getEventId(source) === getEventId(target));
-                            
+                            const sourceMatch = source_events.find(source => getEventId(source) === getEventId(target));
                             if (!sourceMatch) {
                                 var eventjson = {calendar_id: calendar_id,event_id: target.id};
                                 fetch("/delete_event", {
@@ -156,31 +175,36 @@ function Rule(props) {
             window.alert(Array.isArray(value) ? value.join("\n") : value);
         }
 
-        const normalize_date = function (y,m,d,w,dw){
-            var dates = {};
+        const normalize_date = function(dates){
+            var y = (dates.match(/Y([a-z_]+|\d{4})/) || [])[1];
+            var m = (dates.match(/M([a-z_]+|\d{2})/) || [])[1];
+            var d = (dates.match(/D([a-z_]+|\d{2})/) || [])[1];
+            var w = (dates.match(/W([a-z_]+|\d{1})/) || [])[1];
+            var dw = (dates.match(/DAY([a-z_]+|\d{1})/) || [])[1];
+            var shaping_dates = {};
             var year, month, date, day;
             var today = new Date();
             today.setHours(0, 0, 0, 0);
             switch(d){
                 case 'today':
-                    dates.start = today;
-                    return dates;
+                    shaping_dates.start = today;
+                    return shaping_dates;
                 case 'tomorrow':
                     var tomorrow = new Date(today);
                     tomorrow.setDate(today.getDate() + 1);
-                    dates.start = tomorrow;
-                    return dates;
+                    shaping_dates.start = tomorrow;
+                    return shaping_dates;
                 case 'yesterday':
                     var yesterday = new Date(today);
                     yesterday.setDate(today.getDate() - 1);
-                    dates.start = yesterday;
+                    shaping_dates.start = yesterday;
                     return dates;
-                case 'undefined':
-                    dates.type = 'month';
+                case undefined:
+                    shaping_dates.type = 'month';
                     break;
                 default:
                     date = d;
-                    dates.type = 'date';
+                    shaping_dates.type = 'date';
                     break;
             }
             switch(m){
@@ -206,8 +230,8 @@ function Rule(props) {
                         month = today.getMonth();
                     }
                     break;
-                case 'undefined':
-                    dates.type = 'year';
+                case undefined:
+                    shaping_dates.type = 'year';
                     break;
                 default:
                     month = m;
@@ -223,7 +247,7 @@ function Rule(props) {
                 case 'last_year':
                     year = today.getFullYear() - 1;
                     break;
-                case 'undefined':
+                case undefined:
                     break;
                 default:
                     year = y;
@@ -232,52 +256,53 @@ function Rule(props) {
             switch(w){
                 case 'this_week':
                     var day = today.getDay();
-                    dates.type = 'week';
-                    dates.start = new Date(today);
-                    dates.start.setDate(today.getDate() - day);
-                    dates.end = new Date(dates.start);
-                    dates.end.setDate(dates.start.getDate() + 7);
+                    shaping_dates.type = 'week';
+                    shaping_dates.start = new Date(today);
+                    shaping_dates.start.setDate(today.getDate() - day);
+                    shaping_dates.end = new Date(shaping_dates.start);
+                    shaping_dates.end.setDate(shaping_dates.start.getDate() + 7);
                     break;
                 case 'next_week':
                     var day = today.getDay();
-                    dates.start = new Date(today);
-                    dates.type = 'week';
-                    dates.start.setDate(today.getDate() - day + 7);
-                    dates.end = new Date(dates.start);
-                    dates.end.setDate(dates.start.getDate() + 7);
+                    shaping_dates.start = new Date(today);
+                    shaping_dates.type = 'week';
+                    shaping_dates.start.setDate(today.getDate() - day + 7);
+                    shaping_dates.end = new Date(shaping_dates.start);
+                    shaping_dates.end.setDate(shaping_dates.start.getDate() + 7);
                     break;
                 case 'last_week':
                     var day = today.getDay();
-                    dates.start = new Date(today);
-                    dates.type = 'week';
-                    dates.start.setDate(today.getDate() - day - 7);
-                    dates.end = new Date(dates.start);
-                    dates.end.setDate(dates.start.getDate() + 7);
+                    shaping_dates.start = new Date(today);
+                    shaping_dates.type = 'week';
+                    shaping_dates.start.setDate(today.getDate() - day - 7);
+                    shaping_dates.end = new Date(shaping_dates.start);
+                    shaping_dates.end.setDate(shaping_dates.start.getDate() + 7);
                     break;
                 default:
                     break;
             }
             if(dw != 'undefined'){
-                dates.day = Number(dw);
+                shaping_dates.day = Number(dw);
             }
-            switch(dates.type){
+            switch(shaping_dates.type){
                 case 'date':
-                    dates.start = new Date(year, month - 1, date);
+                    shaping_dates.start = new Date(year, month - 1, date);
                     break;
                 case 'month':
-                    dates.start = new Date(year, month - 1, 1);
-                    dates.end = new Date(year, month, 1);
+                    shaping_dates.start = new Date(year, month - 1, 1);
+                    shaping_dates.end = new Date(year, month, 1);
                     break;
                 case 'year':
-                    dates.start = new Date(year, 0, 1);
-                    dates.end = new Date(Number(year) + 1, 0, 1);
+                    shaping_dates.start = new Date(year, 0, 1);
+                    shaping_dates.end = new Date(Number(year) + 1, 0, 1);
                     break;
                 default:
                     break;
             }
-            return dates;
-        }
 
+            return shaping_dates;
+        }
+        
         const date_match = function (e, d, o) {
             var event_dates = new Date(e.date_time);
             var event_year = event_dates.getFullYear();
@@ -285,8 +310,6 @@ function Rule(props) {
             var event_date = event_dates.getDate();
             var start_dates = d.start;
             var end_dates = d.end;
-
-            // window.alert(d.type + " " + start_dates + " " + end_dates);
 
             if(isNaN(end_dates)){ //end_dateが存在しないとき
                 switch(o){
@@ -324,12 +347,19 @@ function Rule(props) {
             }
         }
 
-        const test_print = function (source_event){
-            window.alert(source_event.id);
+        const move = function(old_date, new_date){
+            var event_date = new Date(old_date);
+            console.log(event_date)
         }
 
         var fullcode = '(async () => {' + code + '})();';
-        eval(fullcode);
+        try{
+            eval(fullcode);
+            alert("実行が完了しました");
+        }catch (e) {
+            console.error(e);
+            alert(e);
+        }
     }
 
     const edit = (rule) => {
@@ -344,14 +374,23 @@ function Rule(props) {
     }
 
     const remove = (id) => {
-        fetch("/delete_program", {
-            method: "POST",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({id: id})
-        })
+        if (window.confirm("本当に削除してよろしいですか？")) {
+            fetch("/delete_program", {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id: id})
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("削除が完了しました。");
+                } else {
+                    alert("削除に失敗しました。");
+                }
+            })
+        }
     }
 
     const enable_auto = (event) => {
@@ -367,31 +406,93 @@ function Rule(props) {
         })
     }
 
-    const prev = (props) => {
-
-    }
+    useEffect(() => {
+        setPreviewXml(rule.blockXml);
+    }, [rule])
 
     return (
-        <Col>
-            <Card style={{ width: '18rem' }}><Card.Body>
-                <Card.Title><a>{props.rule.name}</a></Card.Title>
-                <Row>自動実行: <Col><Toggle defaultChecked={props.rule.enable_auto == 'true'} onChange={enable_auto} /></Col></Row>
-                <Row>
-                    <Col><Button variant="outline-success" onClick={() => execution(props.rule.jsCode)} >
-                        実行
-                    </Button></Col>
-                    <Col><Button variant="outline-success" onClick={() => prev(props.rule)} >
-                        preview
-                    </Button></Col>
-                    <Col><Button variant="outline-success" onClick={() => edit(props.rule)} >
-                        編集
-                    </Button></Col>
-                    <Col><Button variant="danger" onClick={() => remove(props.rule.id)} >
-                        ×
-                    </Button></Col>
-                </Row>
-            </Card.Body></Card>
-        </Col>
+        <Row style={{ display: 'flex', alignItems: 'stretch', paddingLeft: '5px', width: '100%' }}>
+            {/* 左側: ルール詳細 */}
+            <Col xs="auto" style={{ display: 'flex', flexDirection: 'column', paddingLeft: '10px' }}>
+                <Card style={{ width: '18rem', flex: 1 }}>
+                    <Card.Body>
+                        <Card.Title>
+                            <span>ルール名: </span><a>{rule.name}</a>
+                        </Card.Title>
+                        <Row>自動実行: <Col>
+                        <Toggle defaultChecked={rule.enable_auto == 'true'} onChange={enable_auto} /></Col></Row>
+                        <Row>
+                            <Col><Button variant="outline-success" onClick={() => execution(rule.jsCode)} >
+                                実行
+                            </Button></Col>
+                            <Col><Button variant="outline-success" onClick={() => edit(rule)} >
+                                編集
+                            </Button></Col>
+                            <Col><Button variant="danger" onClick={() => onRemove(rule.id)} >
+                                ×
+                            </Button></Col>
+                        </Row>
+                    </Card.Body>
+                </Card>
+            </Col>
+    
+            {/* 右側: 共通のプレビューエリア */}
+            <Col style={{ display: 'flex', flexDirection: 'column', paddingLeft: '5px', flex: 0.6 }}>
+                <div
+                    id="preview-container"
+                    style={{
+                        border: '1px solid #ccc',
+                        padding: '10px',
+                        backgroundColor: '#f9f9f9',
+                        borderRadius: '5px',
+                        flex: 1, // プレビューエリアの高さをカードと同じにする
+                    }}
+                >
+                    <h5>プレビュー</h5>
+                    {previewXml && <PreviewBlock blockXml={previewXml} />}
+                </div>
+            </Col>
+        </Row>
     );
-}
+    
+    
+};
+
+const PreviewBlock = ({ blockXml }) => {
+    const containerRef = React.useRef(null);
+
+    React.useEffect(() => {
+        if (!containerRef.current) return;
+
+        while (containerRef.current.firstChild) {
+            containerRef.current.removeChild(containerRef.current.firstChild);
+        }
+
+        const workspace = Blockly.inject(containerRef.current, {
+            toolbox: null,
+            readOnly: true,
+            scrollbars: true,
+        });
+
+        try {
+            const blockXmlDom = Blockly.Xml.textToDom(blockXml);
+            Blockly.Xml.domToWorkspace(blockXmlDom, workspace);
+
+            const blocks = workspace.getAllBlocks();
+            if (blocks.length > 0) {
+                const block = blocks[0]; // 最初のブロックを中央に配置
+                workspace.scrollCenter(block.getSvgRoot()); // ブロックを中央に配置
+            }
+        } catch (error) {
+            console.error('Error loading block XML:', error);
+        }
+
+        return () => {
+            workspace.dispose();
+        };
+    }, [blockXml]);
+
+    return <div ref={containerRef} style={{ height: '300px' }} />;
+};
+
 export default Rule;

@@ -27,13 +27,40 @@ function PageOfRuleList() {
             });
     }, []);
 
+    const removeRule = (id) => {
+        if (window.confirm("本当に削除してよろしいですか？")) {
+            fetch("/delete_program", {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("削除が完了しました。");
+                    // 状態を更新してリストを再描画
+                    setRules(prevRules => prevRules.filter(rule => rule.id !== id));
+                } else {
+                    alert("削除に失敗しました。");
+                }
+            })
+            .catch(error => {
+                console.error("削除エラー:", error);
+                alert("削除中にエラーが発生しました。");
+            });
+        }
+    };
+
     return (
         <div>
             <h1>RuleList</h1>
             <p/>
             <CardColumns>
                 {rules.map((rule,i) => (
-                    <Rule rule={rule}/>
+                    // <Rule rule={rule}/>
+                    <Rule key={rule.id} rule={rule} onRemove={removeRule} />
                 ))}
             </CardColumns>
             <Link to="/make">
