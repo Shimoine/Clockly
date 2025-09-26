@@ -136,13 +136,6 @@ get '/get_writable' do
     return json writable_list
 end
 
-# カレンダの更新機能
-post '/create_calendar' do
-end
-
-post '/delete_calendar' do
-end
-
 post '/insert_event' do
     data = JSON.parse(request.body.read)
     calendar_id = data['calendar_id']
@@ -325,6 +318,8 @@ post '/delete_library' do
         { error: "削除対象が見つかりませんでした" }.to_json
     end
 end
+
+#####################################################
 
 get '/*' do
     content_type 'text/html'

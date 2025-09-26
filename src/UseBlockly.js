@@ -10,8 +10,6 @@ import './Blocks.js';
 var calendar_list = [];  // TODO: state を使う
 
 function UseBlockly(props) {
-    // const [workspace, setWorkspace] = useState(null);
-    //const [calendar_list, setCalendarList] = useState([]);
     const xml = `
         <xml id="toolbox">
             <category name="カレンダ" colour="300" custom="CALENDAR_VARIABLE" >
@@ -279,77 +277,6 @@ function UseBlockly(props) {
         });
     }
 
-    // const registerContextMenuItem = (id, weight, ScopeType ,displayText ,callback) => {
-    //     console.log(Blockly.ContextMenuRegistry.registry);
-    //     const isMenuItemRegistered = Object.values(Blockly.ContextMenuRegistry.registry.registry_).some(item => item.id === id);
-
-    //     if (!isMenuItemRegistered) {
-    //         Blockly.ContextMenuRegistry.registry.register({
-    //             id: id,
-    //             weight: weight,
-    //             scopeType: ScopeType,
-    //             displayText: displayText,
-    //             preconditionFn: function () {
-    //                 return 'enabled';
-    //             },
-    //             callback: callback
-    //         });
-    //     }
-    // };
-
-    // const startBlockly = () => {
-    //     const workspace = Blockly.inject("blocklyDiv", {
-    //         toolbox: xmlDom.getElementById("toolbox"),
-    //     });
-    //     setWorkspace(workspace);
-
-    //     if (props.blockXml != null) {
-    //         const blockXmlDom = Blockly.Xml.textToDom(props.blockXml);
-    //         Blockly.Xml.domToWorkspace(blockXmlDom, workspace);
-    //     }
-        
-    //     RegisterCalendar(workspace);
-
-        // registerContextMenuItem(
-        //     'copy_block',
-        //     200,
-        //     Blockly.ContextMenuRegistry.ScopeType.BLOCK,
-        //     'コピー',
-        //     (scope) => Blockly.clipboard.copy(scope.block)
-        // );
-
-        // registerContextMenuItem(
-        //     'paste_block',
-        //     300,
-        //     Blockly.ContextMenuRegistry.ScopeType.WORKSPACE,
-        //     '貼り付け',
-        //     () => Blockly.clipboard.paste()
-        // );
-
-        // registerContextMenuItem(
-        //     'Hello',
-        //     400,
-        //     Blockly.ContextMenuRegistry.ScopeType.WORKSPACE,
-        //     'Hello',
-        //     () => console.log('Hello')
-        // );
-
-        // return () => {
-        //     const itemsToUnregister = ['copy_block', 'paste_block', 'Hello'];
-        //     // const itemsToUnregister = ['Hello'];
-        //     itemsToUnregister.forEach(id => {
-        //         const item = Object.values(Blockly.ContextMenuRegistry.registry.registry_).some(item => item.id === id);
-        //         if (item) {
-        //             Blockly.ContextMenuRegistry.registry.unregister(item);
-        //         }
-        //     });
-        // };
-    // }
-
-    // useEffect(() => {
-    //    startBlockly();
-    // }, []);
-
     useEffect(() => {
         var workspace = Blockly.inject("blocklyDiv", {
             toolbox: xmlDom.getElementById("toolbox")
@@ -357,7 +284,6 @@ function UseBlockly(props) {
         props.setWorkspace(workspace);
         if (props.blockXml!=null){
             var blockXmlDom = Blockly.Xml.textToDom(props.blockXml);
-            //workspace.clear();
             Blockly.Xml.domToWorkspace(blockXmlDom, workspace);
         }
         RegisterCalendar(workspace);
