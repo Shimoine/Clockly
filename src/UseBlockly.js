@@ -1,15 +1,14 @@
 import { useEffect } from "react";
 import React, { useState } from "react";
-import Blockly from './blockly_compressed';
-// import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 
-import './javascript_compressed.js';
-import './python_compressed.js';
 import './Blocks.js';
 
 var calendar_list = [];  // TODO: state を使う
 
 function UseBlockly(props) {
+    // const [workspace, setWorkspace] = useState(null);
+    //const [calendar_list, setCalendarList] = useState([]);
     const xml = `
         <xml id="toolbox">
             <category name="カレンダ" colour="300" custom="CALENDAR_VARIABLE" >
@@ -236,6 +235,12 @@ function UseBlockly(props) {
                     </value>
                 </block>
             </category>
+            <category name="test" colour="60" >
+                <block type="test_event">
+                </block>
+                <block type="test_and">
+                </block>
+            </category>
         </xml>
     `;
     
@@ -250,7 +255,7 @@ function UseBlockly(props) {
                 calendar_list = [];
                 json.map(calendar => {
                     calendars.push([calendar.summary, calendar.id]);
-                    workspace.createVariable(calendar.summary, "Calendar");
+                    workspace.getVariableMap().createVariable(calendar.summary, "Calendar");
                     calendar_list.push([calendar.summary, calendar.id]);
                 })
                 calendar_list.sort((a, b) => a[0].localeCompare(b[0]));
@@ -260,7 +265,7 @@ function UseBlockly(props) {
 
         workspace.registerToolboxCategoryCallback ("CALENDAR_VARIABLE", (workspace) => {
             const xmlStringList = []
-            const calendarVariables = workspace.getVariablesOfType ("Calendar");
+            const calendarVariables = workspace.getVariableMap().getVariablesOfType ("Calendar");
             if (calendarVariables.length > 0) {
                 let field = "<field name=\"FIELD_NAME\" id=\"" + calendarVariables[0].getId () + "\" variabletype=\"Calendar\"></field>";
                 // ここのスコープがよくわからない．calendar_list は state では値が入らなかった．
@@ -271,7 +276,7 @@ function UseBlockly(props) {
                 }
             }
             const xmlElementList = xmlStringList.map ((item) => {
-                return Blockly.Xml.textToDom (item);
+                return Blockly.utils.xml.textToDom (item);
             });
             return xmlElementList;
         });
@@ -283,11 +288,11 @@ function UseBlockly(props) {
         });
         props.setWorkspace(workspace);
         if (props.blockXml!=null){
-            var blockXmlDom = Blockly.Xml.textToDom(props.blockXml);
+            var blockXmlDom = Blockly.utils.xml.textToDom(props.blockXml);
             Blockly.Xml.domToWorkspace(blockXmlDom, workspace);
         }
         RegisterCalendar(workspace);
-        Blockly.svgResize(workspace);
+        workspace.resize();
         workspace.scrollCenter();
     }, []);
 

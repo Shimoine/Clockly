@@ -6,7 +6,10 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import UseBlockly from './UseBlockly'
-import Blockly from './blockly_compressed';
+import * as Blockly from 'blockly';
+import { javascriptGenerator } from 'blockly/javascript';
+import { pythonGenerator } from 'blockly/python';
+
 
 import 'react-tabs/style/react-tabs.css';
 
@@ -28,7 +31,7 @@ function PageOfMakeRule(props) {
         }, []);
 
     const createRule = () => {
-        var code = Blockly.JavaScript.workspaceToCode(workspace);
+        var code = javascriptGenerator.workspaceToCode(workspace);
         var calendar_id_list = code.split('/*{*/').slice(1).map(e => {
             return e.split('/*}*/')[0].split("'")[1];
         });
@@ -36,8 +39,8 @@ function PageOfMakeRule(props) {
             id: location.state?.id,
             name: name,
             blockXml: Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)),
-            jsCode: Blockly.JavaScript.workspaceToCode(workspace),
-            rbCode: Blockly.Python.workspaceToCode(workspace),
+            jsCode: javascriptGenerator.workspaceToCode(workspace),
+            rbCode: pythonGenerator.workspaceToCode(workspace),
             calendar_id_list: calendar_id_list,
             enable_auto: false
         };
@@ -58,20 +61,12 @@ function PageOfMakeRule(props) {
     const handleNameChange = (event) => {
         setName(event.target.value);
     }
-
-    // const tab_select = () => {
-    //     setBlockXml(Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)))
-    //     setJsCode(Blockly.JavaScript.workspaceToCode(workspace))
-    //     setRbCode(Blockly.Python.workspaceToCode(workspace))
-    // }
-
-
-        const importLibrary = (xml) => {
-            // Blockly タブに移動
-            setSelectedTab(0);
-            // ワークスペース上のブロックを取得
-            const currentXml = Blockly.Xml.workspaceToDom(workspace);
-            let currentXmlText = Blockly.Xml.domToText(currentXml);
+    const importLibrary = (xml) => {
+        // Blockly タブに移動
+        setSelectedTab(0);
+        // ワークスペース上のブロックを取得
+        const currentXml = Blockly.Xml.workspaceToDom(workspace);
+        let currentXmlText = Blockly.Xml.domToText(currentXml);
             // ワークスペース上のブロックのXMLと結合
             currentXmlText = currentXmlText.replace('</xml>', '');
             const combinedXml = `${currentXmlText}${xml}</xml>`;
@@ -149,13 +144,13 @@ function PageOfMakeRule(props) {
             });
     
             try {
-                const blockXmlDom = Blockly.Xml.textToDom(blockXml);
+                const blockXmlDom = Blockly.utils.xml.textToDom(blockXml);
                 Blockly.Xml.domToWorkspace(blockXmlDom, preview_workspace);
-    
-                const blocks = preview_workspace.getAllBlocks();
+
+                const blocks = preview_workspace.getTopBlocks();
                 if (blocks.length > 0) {
                     const block = blocks[0]; // 最初のブロックを中央に配置
-                    preview_workspace.scrollCenter(block.getSvgRoot()); // ブロックを中央に配置
+                    preview_workspace.centerOnBlock(block.id); // ブロックを中央に配置
                 }
             } catch (error) {
                 console.error('Error loading block XML:', error);
@@ -175,10 +170,10 @@ function PageOfMakeRule(props) {
             setBlockXml(Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)));
         }
         if (index === 1) { // JavaScriptタブが選択されたとき
-            setJsCode(Blockly.JavaScript.workspaceToCode(workspace));
+            setJsCode(javascriptGenerator.workspaceToCode(workspace));
         }
         if (index === 2) { // Rubyタブが選択されたとき
-            setRbCode(Blockly.Python.workspaceToCode(workspace));
+            setRbCode(pythonGenerator.workspaceToCode(workspace));
         }
     };
 
@@ -186,9 +181,9 @@ function PageOfMakeRule(props) {
         setName(location.state?.name);
         setBlockXml(location.state?.block);
         if (workspace && blockXml) {
-            const dom = Blockly.Xml.textToDom(blockXml);
+            const dom = Blockly.utils.xml.textToDom(blockXml);
             Blockly.Xml.clearWorkspaceAndLoadFromXml(dom, workspace);
-            Blockly.svgResize(workspace);
+            workspace.resize();
             workspace.scrollCenter();
         }
     }, [location.state?.block, workspace]);
@@ -232,14 +227,6 @@ function PageOfMakeRule(props) {
                     </pre>
                 </TabPanel>
             </Tabs>
-            <p/>
-            <Link to="/list">
-                <Button variant="outline-success" onClick={createRule}>
-                    ルールを作成
-                </Button>
-            </Link>
-                <UseBlockly h={400} w={1200} setWorkspace={setWorkspace} blockXml={blockXml} setBlockXml={setBlockXml}/>
-            <p/>
             <Link to="/list">
                 <Button variant="outline-success" onClick={createRule}>
                     ルールを変更

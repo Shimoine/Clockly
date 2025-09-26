@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button';
 import Toggle from 'react-toggle'
 import React, { useState } from 'react';
 import { useEffect } from "react";
-import Blockly from './blockly_compressed';
+import * as Blockly from 'blockly';
 import { BrowserRouter as Router, Route, Link, useNavigate } from 'react-router-dom';
 //import e from 'express';
 
@@ -475,13 +475,13 @@ const PreviewBlock = ({ blockXml }) => {
         });
 
         try {
-            const blockXmlDom = Blockly.Xml.textToDom(blockXml);
+            const blockXmlDom = Blockly.utils.xml.textToDom(blockXml);
             Blockly.Xml.domToWorkspace(blockXmlDom, workspace);
 
-            const blocks = workspace.getAllBlocks();
+            const blocks = workspace.getTopBlocks();
             if (blocks.length > 0) {
                 const block = blocks[0]; // 最初のブロックを中央に配置
-                workspace.scrollCenter(block.getSvgRoot()); // ブロックを中央に配置
+                workspace.centerOnBlock(block.id); // ブロックを中央に配置
             }
         } catch (error) {
             console.error('Error loading block XML:', error);

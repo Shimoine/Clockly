@@ -3,9 +3,10 @@ import { BrowserRouter as Router, Route, Link, useLocation } from 'react-router-
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form'
 import UseBlockly from './UseBlockly'
-import Blockly from './blockly_compressed';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-// import Blockly from 'blockly';
+import * as Blockly from 'blockly';
+import { javascriptGenerator } from 'blockly/javascript';
+import { pythonGenerator } from 'blockly/python';
 import 'react-tabs/style/react-tabs.css';
 
 function PageOfMakeRule(props) {
@@ -30,7 +31,7 @@ function PageOfMakeRule(props) {
             if (!workspace) {
                 throw new Error("Workspace is not initialized.");
             }
-        var code = Blockly.JavaScript.workspaceToCode(workspace);
+        var code = javascriptGenerator.workspaceToCode(workspace);
         var calendar_id_list = code.split('/*{*/').slice(1).map(e => {
             return e.split('/*}*/')[0].split("'")[1];
         });
@@ -38,8 +39,8 @@ function PageOfMakeRule(props) {
             id: crypto.randomUUID(),
             name: name,
             blockXml: Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)),
-            jsCode: Blockly.JavaScript.workspaceToCode(workspace),
-            rbCode: Blockly.Python.workspaceToCode(workspace),
+            jsCode: javascriptGenerator.workspaceToCode(workspace),
+            rbCode: pythonGenerator.workspaceToCode(workspace),
             calendar_id_list: calendar_id_list,
             enable_auto: false
         };
@@ -146,13 +147,13 @@ function PageOfMakeRule(props) {
             });
     
             try {
-                const blockXmlDom = Blockly.Xml.textToDom(blockXml);
+                const blockXmlDom = Blockly.utils.xml.textToDom(blockXml);
                 Blockly.Xml.domToWorkspace(blockXmlDom, preview_workspace);
-    
-                const blocks = preview_workspace.getAllBlocks();
+
+                const blocks = preview_workspace.getTopBlocks();
                 if (blocks.length > 0) {
                     const block = blocks[0]; // 最初のブロックを中央に配置
-                    preview_workspace.scrollCenter(block.getSvgRoot()); // ブロックを中央に配置
+                    preview_workspace.centerOnBlock(block.id); // ブロックを中央に配置
                 }
             } catch (error) {
                 console.error('Error loading block XML:', error);
@@ -172,10 +173,10 @@ function PageOfMakeRule(props) {
             setBlockXml(Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)));
         }
         if (index === 1) { // JavaScriptタブが選択されたとき
-            setJsCode(Blockly.JavaScript.workspaceToCode(workspace));
+            setJsCode(javascriptGenerator.workspaceToCode(workspace));
         }
         if (index === 2) { // Rubyタブが選択されたとき
-            setRbCode(Blockly.Python.workspaceToCode(workspace));
+            setRbCode(pythonGenerator.workspaceToCode(workspace));
         }
     };
 
