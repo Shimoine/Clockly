@@ -1040,47 +1040,6 @@ Blockly.Blocks['text'] = {
     }
 }
 
-// AI
-Blockly.Blocks['test_and'] = {
-    init: function() {
-        this.appendValueInput("value1")
-            .setCheck(null);
-        this.appendValueInput("value2")
-            .setCheck(null)
-            .appendField("と");
-        this.setInputsInline(false);
-        this.setOutput(true, "Boolean");
-        this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-    }
-};
-
-Blockly.Blocks['test_event'] = {
-    init: function() {
-        this.appendValueInput("calendar")
-            .setCheck(null);
-        this.appendDummyInput()
-            .appendField("について");
-        this.appendValueInput("boolean")
-            .setCheck(null);
-        this.appendDummyInput()
-            .appendField("の(共通の)空き時間に");
-        this.appendDummyInput()
-            .appendField("”")
-            .appendField(new Blockly.FieldTextInput("ここに入力"), "text")
-            .appendField("”")
-        this.appendDummyInput()
-            .appendField("の予定を追加");
-        this.setInputsInline(true);
-        this.setOutput(false);
-        this.setColour(210);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-    }
-};
-
-
 /* JavaScript */
 
 javascriptGenerator.forBlock['dummy_value'] = function(block) {
@@ -1340,13 +1299,10 @@ javascriptGenerator.forBlock['specified_year'] = function(block) {
 
 javascriptGenerator.forBlock['specified_month'] = function(block) {
     var month = block.getFieldValue('month');
-    var date = javascriptGenerator.valueToCode(block, 'date', javascriptGenerator.ORDER_ATOMIC) || null;
-    var day = javascriptGenerator.valueToCode(block, 'day', javascriptGenerator.ORDER_ATOMIC) || null;
+    var date = javascriptGenerator.valueToCode(block, 'date', javascriptGenerator.ORDER_ATOMIC) || '';
     var code = 'M' + month;
     if(date) {
         code = code + date;
-    }else if(day) {
-        code = code + day;
     }
     return [code, javascriptGenerator.ORDER_ATOMIC];
 }

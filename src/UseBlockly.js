@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import React, { useState } from "react";
 import * as Blockly from 'blockly';
+import { Button, Modal, Row, Col } from "react-bootstrap";
 
 import './Blocks.js';
 
@@ -9,6 +10,14 @@ var calendar_list = [];  // TODO: state を使う
 function UseBlockly(props) {
     // const [workspace, setWorkspace] = useState(null);
     //const [calendar_list, setCalendarList] = useState([]);
+    const [isAIGenerating, setIsAIGenerating] = useState(false);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [previewData, setPreviewData] = useState({
+        originalXml: '',
+        completedXml: '',
+        originalWorkspace: null,
+        completedWorkspace: null
+    });
     const xml = `
         <xml id="toolbox">
             <category name="カレンダ" colour="300" custom="CALENDAR_VARIABLE" >
@@ -235,12 +244,6 @@ function UseBlockly(props) {
                     </value>
                 </block>
             </category>
-            <category name="test" colour="60" >
-                <block type="test_event">
-                </block>
-                <block type="test_and">
-                </block>
-            </category>
         </xml>
     `;
     
@@ -282,6 +285,224 @@ function UseBlockly(props) {
         });
     }
 
+    // ブロック定義を取得する関数
+    const getBlockDefinitions = () => {
+        if (!props.workspace) {
+            return {};
+        }
+        
+        const blockDefinitions = {};
+        const registeredBlocks = Object.keys(Blockly.Blocks);
+        
+        // 標準ブロック（エラーが発生するもの）をスキップするリスト
+        const skipBlocks = [
+            'variables_get_dynamic', 'variables_set_dynamic', 'variables_get', 'variables_set',
+            'text_join', 'text_charAt', 'text_prompt', 'math_number_property', 'math_on_list',
+            'controls_for', 'controls_forEach', 'controls_flow_statements', 'controls_if',
+            'logic_compare', 'logic_ternary', 'procedures_defnoreturn', 'procedures_defreturn',
+            'procedures_callnoreturn', 'procedures_callreturn', 'procedures_ifreturn',
+            'lists_create_with', 'lists_repeat', 'lists_indexOf', 'lists_getIndex',
+            'lists_setIndex', 'lists_getSublist', 'lists_split', 'lists_sort'
+        ];
+        
+        registeredBlocks.forEach(blockType => {
+            // 標準ブロックをスキップ
+            if (skipBlocks.includes(blockType) || blockType.startsWith('variables_') || 
+                blockType.startsWith('procedures_') || blockType.startsWith('controls_') ||
+                blockType.startsWith('logic_') || blockType.startsWith('math_') ||
+                blockType.startsWith('text_') || blockType.startsWith('lists_') ||
+                blockType.startsWith('colour_')) {
+                return;
+            }
+            
+            const block = Blockly.Blocks[blockType];
+            if (block && block.init) {
+                try {
+                    const tempBlock = new Blockly.Block(props.workspace, blockType);
+                    block.init.call(tempBlock);
+                    
+                    blockDefinitions[blockType] = {
+                        type: blockType,
+                        message0: tempBlock.interpolateMsg || tempBlock.message0 || '',
+                        args0: tempBlock.args0 || [],
+                        inputsInline: tempBlock.inputsInline,
+                        output: tempBlock.outputConnection?.getCheck() || null,
+                        colour: tempBlock.colour_ || '',
+                        tooltip: tempBlock.tooltip || '',
+                        helpUrl: tempBlock.helpUrl || '',
+                        previousStatement: tempBlock.previousConnection ? true : false,
+                        nextStatement: tempBlock.nextConnection ? true : false
+                    };
+                    
+                    tempBlock.dispose();
+                } catch (error) {
+                    console.warn(`ブロック ${blockType} の処理中にエラー:`, error);
+                }
+            }
+        });
+        
+        return blockDefinitions;
+    };
+
+    // AI補完処理を実行する関数
+    const handleAICompletion = async () => {
+        if (!props.workspace) {
+            alert("ワークスペースが初期化されていません");
+            return;
+        }
+
+        if (!props.ruleName) {
+            alert("ルール名が未定義です");
+            return;
+        }
+
+        setIsAIGenerating(true); // AI生成開始
+
+        try {
+            // 現在のワークスペースのXMLを取得
+            const currentXml = Blockly.Xml.workspaceToDom(props.workspace);
+            const currentXmlText = Blockly.Xml.domToText(currentXml);
+            const availableBlocks = getBlockDefinitions();
+
+            // Gemini APIに送信するデータ
+            const requestData = {
+                currentWorkspace: currentXmlText,
+                availableBlocks: availableBlocks,
+                toolboxExample: xml, // ツールボックスのXMLを例として追加
+                ruleName: props.ruleName
+            };
+
+            // Gemini APIに送信
+            const response = await fetch('/gemini-completion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Gemini APIの呼び出しに失敗しました');
+            }
+
+            const result = await response.json();
+            
+            if (result.completedXml) {
+                // 補完前後の比較プレビューを準備
+                setPreviewData({
+                    originalXml: currentXmlText,
+                    completedXml: result.completedXml,
+                    originalWorkspace: null,
+                    completedWorkspace: null
+                });
+                setShowPreviewModal(true);
+            } else {
+                alert("AI補完の結果を取得できませんでした");
+            }
+
+        } catch (error) {
+            console.error('AI補完エラー:', error);
+            alert("AI補完中にエラーが発生しました: " + error.message);
+        } finally {
+            setIsAIGenerating(false); // AI生成終了
+        }
+    };
+
+    // プレビューモーダルで変更を適用する関数
+    const applyChanges = () => {
+        try {
+            props.workspace.clear();
+            const completedXmlDom = Blockly.utils.xml.textToDom(previewData.completedXml);
+            Blockly.Xml.domToWorkspace(completedXmlDom, props.workspace);
+            
+            // ワークスペースの中央にブロックを配置
+            const topBlocks = props.workspace.getTopBlocks();
+            if (topBlocks.length > 0) {
+                const firstBlock = topBlocks[0];
+                props.workspace.centerOnBlock(firstBlock.id);
+                
+                let yOffset = 0;
+                topBlocks.forEach((block, index) => {
+                    if (index > 0) {
+                        block.moveBy(0, yOffset);
+                        yOffset += 100;
+                    }
+                });
+            }
+            
+            setShowPreviewModal(false);
+        } catch (error) {
+            console.error('適用エラー:', error);
+            alert("変更の適用中にエラーが発生しました: " + error.message);
+        }
+    };
+
+    // プレビューモーダルをキャンセルする関数
+    const cancelChanges = () => {
+        setShowPreviewModal(false);
+    };
+
+    // プレビュー用ワークスペースを作成する関数
+    const PreviewWorkspace = ({ xmlText, title }) => {
+        const containerRef = React.useRef(null);
+        
+        React.useEffect(() => {
+            if (!containerRef.current || !xmlText) return;
+            
+            // 既存のワークスペースをクリア
+            while (containerRef.current.firstChild) {
+                containerRef.current.removeChild(containerRef.current.firstChild);
+            }
+            
+            const previewWorkspace = Blockly.inject(containerRef.current, {
+                toolbox: null,
+                readOnly: true,
+                scrollbars: true,
+                zoom: {
+                    controls: true,
+                    wheel: false,
+                    startScale: 0.7,
+                    maxScale: 1.5,
+                    minScale: 0.3,
+                    scaleSpeed: 1.2
+                }
+            });
+            
+            try {
+                if (xmlText.trim()) {
+                    const xmlDom = Blockly.utils.xml.textToDom(xmlText);
+                    Blockly.Xml.domToWorkspace(xmlDom, previewWorkspace);
+                    
+                    const blocks = previewWorkspace.getTopBlocks();
+                    if (blocks.length > 0) {
+                        previewWorkspace.centerOnBlock(blocks[0].id);
+                    }
+                }
+            } catch (error) {
+                console.error('プレビューワークスペース作成エラー:', error);
+            }
+            
+            return () => {
+                previewWorkspace.dispose();
+            };
+        }, [xmlText]);
+        
+        return (
+            <div>
+                <h6>{title}</h6>
+                <div 
+                    ref={containerRef} 
+                    style={{ 
+                        height: '300px', 
+                        width: '100%', 
+                        border: '1px solid #ccc', 
+                        borderRadius: '4px' 
+                    }} 
+                />
+            </div>
+        );
+    };
+
     useEffect(() => {
         var workspace = Blockly.inject("blocklyDiv", {
             toolbox: xmlDom.getElementById("toolbox")
@@ -297,10 +518,55 @@ function UseBlockly(props) {
     }, []);
 
     return (
-        <div>
-            <div id="blocklyDiv" style={{height: props.h, width: props.w}}></div>
+        <div style={{ position: "relative", height: props.h, width: props.w }}>
+            <div id="blocklyDiv" style={{ height: "100%", width: "100%" }}></div>
+            <Button
+                variant="outline-success"
+                disabled={isAIGenerating}
+                style={{ 
+                    position: "absolute", 
+                    top: "10px", 
+                    right: "10px", 
+                    zIndex: 1000,
+                    marginRight: '10px'
+                }}
+                onClick={handleAICompletion}
+            >
+                {isAIGenerating ? "AI生成中..." : "AI補完"}
+            </Button>
+
+            {/* AI補完プレビューモーダル */}
+            <Modal show={showPreviewModal} onHide={cancelChanges} size="xl">
+                <Modal.Header closeButton>
+                    <Modal.Title>AI補完プレビュー</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row>
+                        <Col md={6}>
+                            <PreviewWorkspace 
+                                xmlText={previewData.originalXml} 
+                                title="補完前" 
+                            />
+                        </Col>
+                        <Col md={6}>
+                            <PreviewWorkspace 
+                                xmlText={previewData.completedXml} 
+                                title="補完後" 
+                            />
+                        </Col>
+                    </Row>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={cancelChanges}>
+                        キャンセル
+                    </Button>
+                    <Button variant="primary" onClick={applyChanges}>
+                        変更を適用
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
-    );    
+    ); 
 }
 
 export default UseBlockly;

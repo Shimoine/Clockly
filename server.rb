@@ -5,6 +5,8 @@ require "json"
 require "google-apis-calendar_v3"
 require 'googleauth/stores/file_token_store'
 require 'dotenv/load'
+require 'net/http'
+require 'uri'
 
 DB_PATH = "./db/"
 
@@ -316,6 +318,123 @@ post '/delete_library' do
     else
         status 404
         { error: "削除対象が見つかりませんでした" }.to_json
+    end
+end
+
+#####################################################
+# AI補完機能
+#####################################################
+
+post '/gemini-completion' do
+    content_type :json
+    
+    begin
+        puts "Received request for Gemini completion"
+        data = JSON.parse(request.body.read)
+        current_workspace = data['currentWorkspace']
+        available_blocks = data['availableBlocks']
+        toolbox_example = data['toolboxExample']
+        rule_name = data['ruleName']
+        
+        # Gemini APIへのリクエスト構築
+        gemini_api_key = ENV['GEMINI_API_KEY']
+        if gemini_api_key.nil? || gemini_api_key.empty?
+            return { error: 'Gemini API key is not configured' }.to_json
+        end
+        
+        # Gemini API URL
+        uri = URI("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=#{gemini_api_key}")
+        
+        # リクエストボディ
+        request_body = {
+            contents: [{
+                parts: [{
+                    text: "
+【ブロックプログラミング補完ルール】
+
+あなたはBlocklyを使ったカレンダー操作のブロックプログラミング補完AIです。以下のルールに従って、現在のワークスペースのブロックを分析し、完成させてください。
+
+## ルール名
+#{rule_name || '不明なルール'}
+
+## 基本ルール
+1. 現在のワークスペースの意図を理解し、不完全な部分を補完する
+2. 利用可能なブロック定義から適切なブロックを選択する
+3. カレンダー操作の論理的なフローを構築する
+4. shadow blockや接続されていない値は適切なブロックで置き換える
+5. ルール名に応じて適切な処理フローを構築する
+
+## XMLの書き方例（ツールボックス参考）
+上記のtoolboxExampleを参考にして、正しいXML構造とvalue name、field nameの書き方を確認してください。
+
+このようにすることで、ユーザーがカレンダーカテゴリから適切なカレンダーブロックを選択できるようになります。
+
+## ブロックカテゴリ
+- カレンダ: カレンダー変数の管理
+- カレンダ操作: 予定の取得、挿入、更新、削除
+- 抽出: フィルター、条件分岐、条件判定
+- 加工: データの変換、写像処理
+- 日付: 日付・時刻の指定
+- 集計/表示: データの集計と出力
+
+## 重要な注意事項
+- value nameは小文字で統一してください
+- field nameは正確に記述してください
+- ブロックのtype属性は利用可能なブロック定義と一致させてください
+- XMLの構造はツールボックス例を参考にしてください
+
+## 出力形式
+完成したBlockly XMLのみを返してください。説明文は不要です。
+
+現在のワークスペース: \n#{current_workspace}
+利用可能なブロック定義: \n#{available_blocks.to_json}
+ツールボックスXML例（ブロックの書き方参考）:\n#{toolbox_example}"
+                }]
+            }],
+            generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 8192
+            }
+        }
+        
+        # HTTPリクエスト送信
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        
+        request = Net::HTTP::Post.new(uri)
+        request['Content-Type'] = 'application/json'
+        request.body = request_body.to_json
+        
+        response = http.request(request)
+        
+        if response.code == '200'
+            result = JSON.parse(response.body)
+            
+            if result['candidates'] && result['candidates'].length > 0
+                completed_xml = result['candidates'][0]['content']['parts'][0]['text']
+                
+                # XMLタグで囲まれた部分を抽出
+                xml_match = completed_xml.match(/<xml[^>]*>.*?<\/xml>/m)
+                if xml_match
+                    completed_xml = xml_match[0]
+                end
+                
+                return { completedXml: completed_xml }.to_json
+            else
+                return { error: 'No completion generated' }.to_json
+            end
+        else
+            puts "Gemini API Error: #{response.code} - #{response.body}"
+            return { error: "Gemini API request failed: #{response.code}" }.to_json
+        end
+        
+    rescue JSON::ParserError => e
+        puts "JSON Parse Error: #{e.message}"
+        return { error: 'Invalid JSON in request' }.to_json
+    rescue => e
+        puts "General Error: #{e.message}"
+        puts e.backtrace
+        return { error: "Internal server error: #{e.message}" }.to_json
     end
 end
 

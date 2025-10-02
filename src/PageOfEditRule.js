@@ -203,7 +203,7 @@ function PageOfMakeRule(props) {
                     <Tab>Library</Tab>
                 </TabList>
                 <TabPanel>
-                    <UseBlockly h={500} w={1200} setWorkspace={setWorkspace} blockXml={blockXml} setBlockXml={setBlockXml}/>
+                    <UseBlockly h={500} w={1200} workspace={workspace} setWorkspace={setWorkspace} blockXml={blockXml} setBlockXml={setBlockXml} ruleName={name}/>
                 </TabPanel>
                 <TabPanel>
                     <pre><code>{jsCode}</code></pre>
