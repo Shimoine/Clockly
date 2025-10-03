@@ -346,11 +346,6 @@ function UseBlockly(props) {
 
     // AI補完処理を実行する関数
     const handleAICompletion = async () => {
-        if (!props.workspace) {
-            alert("ワークスペースが初期化されていません");
-            return;
-        }
-
         if (!props.ruleName) {
             alert("ルール名が未定義です");
             return;
@@ -361,15 +356,38 @@ function UseBlockly(props) {
         try {
             // 現在のワークスペースのXMLを取得
             const currentXml = Blockly.Xml.workspaceToDom(props.workspace);
+            currentXml.querySelectorAll("block").forEach(b => b.removeAttribute("id")); //id 属性を削除して比較を容易にする
             const currentXmlText = Blockly.Xml.domToText(currentXml);
-            const availableBlocks = getBlockDefinitions();
 
-            // Gemini APIに送信するデータ
+            // 利用可能なブロック定義を取得
+            const availableBlocks = getBlockDefinitions();
+            console.log("Available Blocks:", availableBlocks);
+
+            // サーバーから利用可能なカレンダー一覧を取得して送信
+            let availableCalendars = [];
+            const resp = await fetch('/calendar_list');
+            if (resp.ok) {
+                const list = await resp.json();
+                availableCalendars = list.map(c => ({ summary: c.summary, id: c.id }));
+            } else {
+                availableCalendars = []; 
+            }
+            console.log("Available Calendars:", availableCalendars);
+
+            // AIへのフィールド名ヒント（モデルに既存のフィールド名を使わせる）
+            const fieldNameHints = {
+                calendarSummaryField: 'summary',
+                calendarIdField: 'id',
+                textField: 'text'
+            };
+
             const requestData = {
                 currentWorkspace: currentXmlText,
                 availableBlocks: availableBlocks,
-                toolboxExample: xml, // ツールボックスのXMLを例として追加
-                ruleName: props.ruleName
+                toolboxExample: xml,
+                ruleName: props.ruleName,
+                availableCalendars: availableCalendars,
+                fieldNameHints: fieldNameHints
             };
 
             // Gemini APIに送信
@@ -386,6 +404,7 @@ function UseBlockly(props) {
             }
 
             const result = await response.json();
+            console.log(result.completedXml)
             
             if (result.completedXml) {
                 // 補完前後の比較プレビューを準備
@@ -404,11 +423,11 @@ function UseBlockly(props) {
             console.error('AI補完エラー:', error);
             alert("AI補完中にエラーが発生しました: " + error.message);
         } finally {
-            setIsAIGenerating(false); // AI生成終了
+            setIsAIGenerating(false);
         }
     };
 
-    // プレビューモーダルで変更を適用する関数
+    // AI補完の適用
     const applyChanges = () => {
         try {
             props.workspace.clear();

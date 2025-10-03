@@ -96,20 +96,20 @@ Blockly.Blocks['insert_event1'] = {
     }
 };
 
-Blockly.Blocks['insert_event2'] = {
-    init: function() {
-        this.appendValueInput("calendar")
-            .setCheck("Calendar")
-        this.appendDummyInput("dummy")
-            .appendField("に追加");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(210);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-    }
-};
+// Blockly.Blocks['insert_event2'] = {
+//     init: function() {
+//         this.appendValueInput("calendar")
+//             .setCheck("Calendar")
+//         this.appendDummyInput("dummy")
+//             .appendField("に追加");
+//         this.setInputsInline(true);
+//         this.setPreviousStatement(true, null);
+//         this.setNextStatement(true, null);
+//         this.setColour(210);
+//         this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+//         this.setHelpUrl("");
+//     }
+// };
 
 Blockly.Block.prototype.getMatchingConnection = function(otherBlock, conn) {
     var connections = this.getConnections_(true);
@@ -195,54 +195,41 @@ Blockly.Blocks['print'] = {
     }
 };
 
-Blockly.Blocks['test_print'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField("イベントIDを表示");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(160);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-    }
-};
-
 /* map */
-Blockly.Blocks['map'] = {
-    init: function() {
-        this.appendValueInput("events")
-            .setCheck(["Calendar", "Event"]);
-        this.appendDummyInput()
-            .appendField("の各予定について");
-        this.appendStatementInput("statement")
-            .setCheck("map");
-        this.setInputsInline(true);
-        //this.setPreviousStatement(true, null);
-        //this.setNextStatement(true, null);
-        this.setColour(30);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-        this.setOnChange(function(event) {
-            if (event.type === Blockly.Events.BLOCK_MOVE) {
-                // ブロックが移動されたときのみ処理する
-                var inputBlock = this.getInputTargetBlock('events');
-                if (inputBlock && inputBlock.type === 'calendar') {
-                    // 接続されたブロックが calendar ブロックの場合
-                    this.addGetEventBlock(inputBlock);
-                }
-            }
-        });
-    },
+// Blockly.Blocks['map'] = {
+//     init: function() {
+//         this.appendValueInput("events")
+//             .setCheck(["Calendar", "Event"]);
+//         this.appendDummyInput()
+//             .appendField("の各予定について");
+//         this.appendStatementInput("statement")
+//             .setCheck("map");
+//         this.setInputsInline(true);
+//         //this.setPreviousStatement(true, null);
+//         //this.setNextStatement(true, null);
+//         this.setColour(30);
+//         this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+//         this.setHelpUrl("");
+//         this.setOnChange(function(event) {
+//             if (event.type === Blockly.Events.BLOCK_MOVE) {
+//                 // ブロックが移動されたときのみ処理する
+//                 var inputBlock = this.getInputTargetBlock('events');
+//                 if (inputBlock && inputBlock.type === 'calendar') {
+//                     // 接続されたブロックが calendar ブロックの場合
+//                     this.addGetEventBlock(inputBlock);
+//                 }
+//             }
+//         });
+//     },
 
-    addGetEventBlock: function(calendarBlock) {
-        var getEventBlock = this.workspace.newBlock('get_events');
-        getEventBlock.initSvg();  // 新しいブロックを初期化
-        getEventBlock.render();  // ブロックを描画
-        calendarBlock.parentBlock_.getInput('events').connection.connect(getEventBlock.outputConnection); 
-        this.workspace.render();
-    }
-};
+//     addGetEventBlock: function(calendarBlock) {
+//         var getEventBlock = this.workspace.newBlock('get_events');
+//         getEventBlock.initSvg();  // 新しいブロックを初期化
+//         getEventBlock.render();  // ブロックを描画
+//         calendarBlock.parentBlock_.getInput('events').connection.connect(getEventBlock.outputConnection); 
+//         this.workspace.render();
+//     }
+// };
 
 
 Blockly.Blocks['map_test'] = {
@@ -309,39 +296,39 @@ Blockly.Blocks['map_test2'] = {
     }
 };
 
-Blockly.Blocks['map_output'] = {
-    init: function() {
-        this.appendValueInput("events")
-            .setCheck(["Calendar", "Event"]);
-        this.appendDummyInput()
-            .appendField("の各予定について");
-        this.appendStatementInput("statement")
-            .setCheck("map");
-        this.setInputsInline(true);
-        this.setOutput(true, "Event");
-        this.setColour(0);
-        this.setTooltip("");
-        this.setHelpUrl("");
-        this.setOnChange(function(event) {
-            if (event.type === Blockly.Events.BLOCK_MOVE) {
-                // ブロックが移動されたときのみ処理する
-                var inputBlock = this.getInputTargetBlock('events');
-                if (inputBlock && inputBlock.type === 'calendar') {
-                    // 接続されたブロックが calendar ブロックの場合
-                    this.addGetEventBlock(inputBlock);
-                }
-            }
-        });
-    },
+// Blockly.Blocks['map_output'] = {
+//     init: function() {
+//         this.appendValueInput("events")
+//             .setCheck(["Calendar", "Event"]);
+//         this.appendDummyInput()
+//             .appendField("の各予定について");
+//         this.appendStatementInput("statement")
+//             .setCheck("map");
+//         this.setInputsInline(true);
+//         this.setOutput(true, "Event");
+//         this.setColour(0);
+//         this.setTooltip("");
+//         this.setHelpUrl("");
+//         this.setOnChange(function(event) {
+//             if (event.type === Blockly.Events.BLOCK_MOVE) {
+//                 // ブロックが移動されたときのみ処理する
+//                 var inputBlock = this.getInputTargetBlock('events');
+//                 if (inputBlock && inputBlock.type === 'calendar') {
+//                     // 接続されたブロックが calendar ブロックの場合
+//                     this.addGetEventBlock(inputBlock);
+//                 }
+//             }
+//         });
+//     },
 
-    addGetEventBlock: function(calendarBlock) {
-        var getEventBlock = this.workspace.newBlock('get_events');
-        getEventBlock.initSvg();  // 新しいブロックを初期化
-        getEventBlock.render();  // ブロックを描画
-        calendarBlock.parentBlock_.getInput('events').connection.connect(getEventBlock.outputConnection); 
-        this.workspace.render();
-    }
-};
+//     addGetEventBlock: function(calendarBlock) {
+//         var getEventBlock = this.workspace.newBlock('get_events');
+//         getEventBlock.initSvg();  // 新しいブロックを初期化
+//         getEventBlock.render();  // ブロックを描画
+//         calendarBlock.parentBlock_.getInput('events').connection.connect(getEventBlock.outputConnection); 
+//         this.workspace.render();
+//     }
+// };
 
 /* filter */
 Blockly.Blocks['filter'] = {
@@ -379,22 +366,22 @@ Blockly.Blocks['filter'] = {
     }
 };
 
-Blockly.Blocks['filter2'] = {
-    init: function() {
-        this.appendValueInput("condition")
-            .setCheck("Boolean")
-        this.appendDummyInput()
-            .appendField("で絞り込んだ予定について");
-        this.appendStatementInput("statement")
-            .setCheck("map");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setHelpUrl("");
-        this.setColour(0);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-    }
-};
+// Blockly.Blocks['filter2'] = {
+//     init: function() {
+//         this.appendValueInput("condition")
+//             .setCheck("Boolean")
+//         this.appendDummyInput()
+//             .appendField("で絞り込んだ予定について");
+//         this.appendStatementInput("statement")
+//             .setCheck("map");
+//         this.setInputsInline(true);
+//         this.setPreviousStatement(true, null);
+//         this.setNextStatement(true, null);
+//         this.setHelpUrl("");
+//         this.setColour(0);
+//         this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+//     }
+// };
 
 /* 加工 */
 Blockly.Blocks['property'] = {
@@ -496,23 +483,23 @@ Blockly.Blocks['replace_time'] = {
     }
 };
 
-Blockly.Blocks['replace_map'] = {
-    init: function() {
-        this.appendValueInput("events")
-            .setCheck(["Calendar", "Event"]);
-        this.appendDummyInput()
-            .appendField("の")
-            .appendField(new Blockly.FieldDropdown([["予定名","summary"], ["場所","location"], ["説明","description"]]), "property")
-            .appendField("を")
-            .appendField(new Blockly.FieldTextInput(""), "text")
-            .appendField("に置き換えた予定");
-        this.setInputsInline(true);
-        this.setOutput(true, "Event");
-        this.setColour(240);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-    }
-};
+// Blockly.Blocks['replace_map'] = {
+//     init: function() {
+//         this.appendValueInput("events")
+//             .setCheck(["Calendar", "Event"]);
+//         this.appendDummyInput()
+//             .appendField("の")
+//             .appendField(new Blockly.FieldDropdown([["予定名","summary"], ["場所","location"], ["説明","description"]]), "property")
+//             .appendField("を")
+//             .appendField(new Blockly.FieldTextInput(""), "text")
+//             .appendField("に置き換えた予定");
+//         this.setInputsInline(true);
+//         this.setOutput(true, "Event");
+//         this.setColour(240);
+//         this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+//         this.setHelpUrl("");
+//     }
+// };
 
 Blockly.Blocks['hide'] = {
     init: function() {
@@ -528,23 +515,23 @@ Blockly.Blocks['hide'] = {
     }
 };
 
-Blockly.Blocks['hide_test'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([["予定名","summary"], ["場所","location"], ["説明","description"]]), "property")
-            .appendField("を隠して");
-        this.appendValueInput("calendar")
-            .setCheck("Calendar");
-        this.appendDummyInput()
-            .appendField("に追加");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, "map");
-        this.setNextStatement(true, "map");
-        this.setColour(240);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-    }
-};
+// Blockly.Blocks['hide_test'] = {
+//     init: function() {
+//         this.appendDummyInput()
+//             .appendField(new Blockly.FieldDropdown([["予定名","summary"], ["場所","location"], ["説明","description"]]), "property")
+//             .appendField("を隠して");
+//         this.appendValueInput("calendar")
+//             .setCheck("Calendar");
+//         this.appendDummyInput()
+//             .appendField("に追加");
+//         this.setInputsInline(true);
+//         this.setPreviousStatement(true, "map");
+//         this.setNextStatement(true, "map");
+//         this.setColour(240);
+//         this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+//         this.setHelpUrl("");
+//     }
+// };
 
 Blockly.Blocks['move'] = {
     init: function() {
@@ -648,20 +635,20 @@ Blockly.Blocks['match'] = {
     }
 };
 
-Blockly.Blocks['match2'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([["予定名","summary"], ["場所","location"], ["説明","description"]]), "property")
-            .appendField("が")
-            .appendField(new Blockly.FieldTextInput(""), "text")
-            .appendField("である")
-        this.setInputsInline(true);
-        this.setOutput(true, "Boolean");
-        this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-    }
-};
+// Blockly.Blocks['match2'] = {
+//     init: function() {
+//         this.appendDummyInput()
+//             .appendField(new Blockly.FieldDropdown([["予定名","summary"], ["場所","location"], ["説明","description"]]), "property")
+//             .appendField("が")
+//             .appendField(new Blockly.FieldTextInput(""), "text")
+//             .appendField("である")
+//         this.setInputsInline(true);
+//         this.setOutput(true, "Boolean");
+//         this.setColour(180);
+//         this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+//         this.setHelpUrl("");
+//     }
+// };
 
 Blockly.Blocks['date_match'] = {
     init: function() {

@@ -335,6 +335,11 @@ post '/gemini-completion' do
         available_blocks = data['availableBlocks']
         toolbox_example = data['toolboxExample']
         rule_name = data['ruleName']
+        available_calendars = data['availableCalendars'] || []
+        field_name_hints = data['fieldNameHints'] || {}
+
+        puts "Current Workspace: #{current_workspace}\n\n\n"
+        puts "Rule Name: #{rule_name}\n\n\n"
         
         # Gemini APIへのリクエスト構築
         gemini_api_key = ENV['GEMINI_API_KEY']
@@ -367,8 +372,6 @@ post '/gemini-completion' do
 ## XMLの書き方例（ツールボックス参考）
 上記のtoolboxExampleを参考にして、正しいXML構造とvalue name、field nameの書き方を確認してください。
 
-このようにすることで、ユーザーがカレンダーカテゴリから適切なカレンダーブロックを選択できるようになります。
-
 ## ブロックカテゴリ
 - カレンダ: カレンダー変数の管理
 - カレンダ操作: 予定の取得、挿入、更新、削除
@@ -382,6 +385,26 @@ post '/gemini-completion' do
 - field nameは正確に記述してください
 - ブロックのtype属性は利用可能なブロック定義と一致させてください
 - XMLの構造はツールボックス例を参考にしてください
+
+## 利用可能なカレンダー（この中からのみカレンダーブロックを選択してください）
+#{available_calendars.map{|c| "- #{c['summary']} (id: #{c['id']})"}.join("\n")}
+
+## フィールド名ヒント（必ず以下のフィールド名を使ってください）
+#{field_name_hints.to_json}
+
+## 厳格な出力ルール（新規）
+- 決して任意のフィールド名を生成しないでください。例えば calendarSummaryField, calendarIdField, TEXT などの新しい field name を作らないでください。
+- カレンダーブロックは必ず次の正確な形式を使ってください（例）：
+
+<block type=\"calendar\">\n  <field name=\"summary\">マイカレンダ</field>\n  <field name=\"id\">nomura.laboratory@gmail.com</field>\n</block>
+
+- テキスト値を指定する場合は必ず次の形式を使ってください（例）：
+
+<value name=\"text\">\n  <block type=\"text\">\n    <field name=\"text\">打合せ</field>\n  </block>\n</value>
+
+- 上記で示した summary, id, text のような既存の field name を必ず使用してください。既存のフィールド名がわからない場合は available_blocks を参照して許容される field 名と block type を使ってください。
+- カレンダーブロックで使用する summary と id の値は、必ず利用可能なカレンダー一覧（available_calendars）にあるものを使ってください。存在しないカレンダー名や ID を勝手に生成しないこと。
+- 出力は完成した Blockly XML のみとし、説明文や余分なメタデータは一切含めないでください。
 
 ## 出力形式
 完成したBlockly XMLのみを返してください。説明文は不要です。
@@ -406,6 +429,8 @@ post '/gemini-completion' do
         request.body = request_body.to_json
         
         response = http.request(request)
+
+        puts "Gemini API Response Code: #{response.code}"
         
         if response.code == '200'
             result = JSON.parse(response.body)
