@@ -233,7 +233,7 @@ function PageOfMakeRule(props) {
                 </Button>
             </Link>
             <Button variant="outline-success" onClick={exportLibrary}>
-                Export to Library
+                ライブラリに追加
             </Button>
         </div>
     );

@@ -96,20 +96,20 @@ Blockly.Blocks['insert_event1'] = {
     }
 };
 
-// Blockly.Blocks['insert_event2'] = {
-//     init: function() {
-//         this.appendValueInput("calendar")
-//             .setCheck("Calendar")
-//         this.appendDummyInput("dummy")
-//             .appendField("に追加");
-//         this.setInputsInline(true);
-//         this.setPreviousStatement(true, null);
-//         this.setNextStatement(true, null);
-//         this.setColour(210);
-//         this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-//         this.setHelpUrl("");
-//     }
-// };
+Blockly.Blocks['insert_event2'] = {
+    init: function() {
+        this.appendValueInput("calendar")
+            .setCheck("Calendar")
+        this.appendDummyInput("dummy")
+            .appendField("に追加");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(210);
+        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setHelpUrl("");
+    }
+};
 
 Blockly.Block.prototype.getMatchingConnection = function(otherBlock, conn) {
     var connections = this.getConnections_(true);
@@ -760,7 +760,7 @@ Blockly.Blocks['year'] = {
     init: function() {
         this.appendValueInput("month")
             .setCheck("month")
-            .appendField(new Blockly.FieldNumber(2024, 1970, Infinity, 1), "year")
+            .appendField(new Blockly.FieldNumber(2025, 1970, Infinity, 1), "year")
             .appendField("年");
         this.setInputsInline(false);
         this.setOutput(true, "year");
