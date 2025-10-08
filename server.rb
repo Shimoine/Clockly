@@ -333,7 +333,7 @@ post '/gemini-completion' do
         data = JSON.parse(request.body.read)
         current_workspace = data['currentWorkspace']
         available_blocks = data['availableBlocks']
-        toolbox_example = data['toolboxExample']
+        xml_example = data['xmlExample']
         rule_name = data['ruleName']
         available_calendars = data['availableCalendars'] || []
         field_name_hints = data['fieldNameHints'] || {}
@@ -369,8 +369,8 @@ post '/gemini-completion' do
 4. shadow blockや接続されていない値は適切なブロックで置き換える
 5. ルール名に応じて適切な処理フローを構築する
 
-## XMLの書き方例（ツールボックス参考）
-上記のtoolboxExampleを参考にして、正しいXML構造とvalue name、field nameの書き方を確認してください。
+## XMLの書き方例
+下記のxml_exampleを参考にして、正しいXML構造とvalue name、field nameの書き方を確認してください。
 
 ## ブロックカテゴリ
 - カレンダ: カレンダー変数の管理
@@ -380,38 +380,24 @@ post '/gemini-completion' do
 - 日付: 日付・時刻の指定
 - 集計/表示: データの集計と出力
 
-## 重要な注意事項
-- value nameは小文字で統一してください
-- field nameは正確に記述してください
-- ブロックのtype属性は利用可能なブロック定義と一致させてください
-- XMLの構造はツールボックス例を参考にしてください
-
 ## 利用可能なカレンダー（この中からのみカレンダーブロックを選択してください）
 #{available_calendars.map{|c| "- #{c['summary']} (id: #{c['id']})"}.join("\n")}
 
-## フィールド名ヒント（必ず以下のフィールド名を使ってください）
-#{field_name_hints.to_json}
-
-## 厳格な出力ルール（新規）
-- 決して任意のフィールド名を生成しないでください。例えば calendarSummaryField, calendarIdField, TEXT などの新しい field name を作らないでください。
+## 厳格な出力ルール
+-  field name と value name は必ず XML 例にある通りにしてください。決して任意の field name，value name を生成しないでください。例えば calendarSummaryField, calendarIdField, TEXT などの新しい field name を作らないでください。
 - カレンダーブロックは必ず次の正確な形式を使ってください（例）：
 
 <block type=\"calendar\">\n  <field name=\"summary\">マイカレンダ</field>\n  <field name=\"id\">nomura.laboratory@gmail.com</field>\n</block>
 
-- テキスト値を指定する場合は必ず次の形式を使ってください（例）：
-
-<value name=\"text\">\n  <block type=\"text\">\n    <field name=\"text\">打合せ</field>\n  </block>\n</value>
-
-- 上記で示した summary, id, text のような既存の field name を必ず使用してください。既存のフィールド名がわからない場合は available_blocks を参照して許容される field 名と block type を使ってください。
 - カレンダーブロックで使用する summary と id の値は、必ず利用可能なカレンダー一覧（available_calendars）にあるものを使ってください。存在しないカレンダー名や ID を勝手に生成しないこと。
 - 出力は完成した Blockly XML のみとし、説明文や余分なメタデータは一切含めないでください。
 
 ## 出力形式
 完成したBlockly XMLのみを返してください。説明文は不要です。
 
-現在のワークスペース: \n#{current_workspace}
-利用可能なブロック定義: \n#{available_blocks.to_json}
-ツールボックスXML例（ブロックの書き方参考）:\n#{toolbox_example}"
+現在のワークスペース: \n#{current_workspace} \n
+利用可能なブロック定義: \n#{available_blocks.to_json} \n
+XML例（ブロックの書き方参考）:\n#{xml_example}"
                 }]
             }],
             generationConfig: {

@@ -31,7 +31,7 @@ Blockly.Blocks['dummy_value'] = {
         this.appendDummyInput()
             .appendField(new Blockly.FieldLabelSerializable(""), "text");
         this.setOutput(true, null);
-        this.setTooltip("");
+        this.setTooltip("ブロックの型: ダミー値\n入力可能なブロックの型: \n説明: 値を表すプレースホルダのダミーブロックです。デバッグや見た目の補助に使用します。");
         this.setHelpUrl("");
     }
 };
@@ -42,7 +42,7 @@ Blockly.Blocks['dummy_statement'] = {
             .appendField(new Blockly.FieldLabelSerializable(""), "text");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setTooltip("");
+        this.setTooltip("ブロックの型: ダミーステートメント\n入力可能なブロックの型: \n説明: ステートメント用のプレースホルダブロックです。ワークフローの構成やテストに使用します。");
         this.setHelpUrl("");
     }
 };
@@ -58,7 +58,7 @@ Blockly.Blocks['calendar'] = {
             .setVisible(false);
         this.setOutput(true, "Calendar");
         this.setColour(300);
-        this.setTooltip("ブロックの型: カレンダ\n説明: このブロックはカレンダのIDを取得します．");
+        this.setTooltip("ブロックの型: カレンダ\n入力可能なブロックの型: \n説明: このブロックはカレンダのID（summaryと内部ID）を表します。カレンダを参照する入力として使用します。");
         this.setHelpUrl("");
     }
 };
@@ -73,7 +73,7 @@ Blockly.Blocks['get_events'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Event");
         this.setColour(0);
-        this.setTooltip("ブロックの型: 予定\n入力可能なブロックの型: カレンダ\n説明: このブロックは，接続されたカレンダブロックの予定の一覧を取得します．\n 取得した予定はコピーのデータであるため，加工操作を行っても元の予定は変更されません．");
+        this.setTooltip("ブロックの型: 予定\n入力可能なブロックの型: カレンダ\n説明: 接続したカレンダから予定一覧を取得して返します。返される予定はコピーであり、加工しても元データは変わりません。");
         this.setHelpUrl("");
     }
 };
@@ -91,7 +91,7 @@ Blockly.Blocks['insert_event1'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(210);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定（Event）を指定したカレンダ（Calendar）に追加します。");
         this.setHelpUrl("");
     }
 };
@@ -106,7 +106,7 @@ Blockly.Blocks['insert_event2'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(210);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: カレンダ\n説明: 指定したカレンダに予定データを追加します（イベント情報を別途接続して使用）。");
         this.setHelpUrl("");
     }
 };
@@ -138,7 +138,7 @@ Blockly.Blocks['insert_event'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(210);
-        this.setTooltip("ブロックの型: カレンダ操作 \n説明: 指定した予定を対象のカレンダに追加します");
+        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定（Event）を指定したカレンダ（Calendar）に追加します。");
         this.setHelpUrl("");
     }
 };
@@ -157,7 +157,7 @@ Blockly.Blocks['update_event'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(210);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: カレンダ\n説明: カレンダ1の予定をカレンダ2に同期（コピーまたは更新）します。複数カレンダ間での同期処理に利用します。");
         this.setHelpUrl("");
     },
 };
@@ -175,7 +175,7 @@ Blockly.Blocks['delete_event'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(210);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定（Event）を指定したカレンダから削除します。" );
         this.setHelpUrl("");
     },
 };
@@ -190,7 +190,7 @@ Blockly.Blocks['print'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(160);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 表示\n入力可能なブロックの型: 任意\n説明: 指定した値を表示します（デバッグやユーザーへの情報提示に使用）。");
         this.setHelpUrl("");
     }
 };
@@ -248,7 +248,7 @@ Blockly.Blocks['map_test'] = {
         this.appendDummyInput()
             .appendField("に追加");
         this.setColour(30);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: カレンダ\n説明: カレンダ1の予定を複製して各予定に加工処理を適用し、結果をカレンダ2に追加します。");
         this.setHelpUrl("");
     }
 };
@@ -273,7 +273,7 @@ Blockly.Blocks['map_test2'] = {
         this.appendDummyInput()
             .appendField("に追加");
         this.setColour(30);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: カレンダ\n説明: カレンダ1の予定を条件で絞り込み、絞り込んだ各予定に加工処理を適用してカレンダ2に追加します。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
@@ -344,7 +344,7 @@ Blockly.Blocks['filter'] = {
         this.setHelpUrl("");
         this.setOutput(true, "Event");
         this.setColour(0);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 抽出\n入力可能なブロックの型: カレンダ, 予定\n説明: 指定した条件で予定一覧を絞り込み、フィルタされた予定の配列を返します。");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
                 // ブロックが移動されたときのみ処理する
@@ -394,7 +394,7 @@ Blockly.Blocks['property'] = {
         this.setInputsInline(true);
         this.setOutput(true, "property");
         this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 予定\n説明: 予定（Event）の指定したプロパティ（予定名/場所/説明）を抽出して配列で返します。");
         this.setHelpUrl("");
     }
 };
@@ -410,78 +410,78 @@ Blockly.Blocks['replace_name'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip("ブロックの型: 加工\n説明: 予定名/場所/説明の中から選択した予定の情報を入力した文字列に置き換えます．");
+        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 加工\n説明: 選択したプロパティの値を指定した文字列に置き換えます（加工操作）。");
         this.setHelpUrl("");
     }
 };
 
-Blockly.Blocks['replace_date'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([["開始日", "start"], ["終了日", "end"]]), "property")
-            .appendField("を");
-        this.appendValueInput("dates")
-            .setCheck(["year", "month", "week", "date", "day"])
-        this.appendDummyInput()
-            .appendField("に置き換える");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, "map");
-        this.setNextStatement(true, "map");
-        this.setColour(240);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-        this.setOnChange(function(event) {
-            var inputBlock = this.getInputTargetBlock('dates');
-            if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
-                if (inputBlock && (inputBlock.type === 'month' || inputBlock.type === 'date' || inputBlock.type === 'day')) {
-                    this.addGetEventBlock(inputBlock);
-                }
-            }
-        });
-    },
-    addGetEventBlock: function(dateBlock) {
-        if(dateBlock.type == 'month') {
-        var getYearBlock = this.workspace.newBlock('specified_year');
-        getYearBlock.initSvg();  // 新しいブロックを初期化
-        getYearBlock.render();  // ブロックを描画
-        dateBlock.parentBlock_.getInput('dates').connection.connect(getYearBlock.outputConnection);  // year ブロックを先頭に接続
-        getYearBlock.getInput('dates').connection.connect(dateBlock.outputConnection); // month ブロックを接続
-        }
-        else if(dateBlock.type == 'date') {
-            var getMonthBlock = this.workspace.newBlock('specified_month');
-            getMonthBlock.initSvg();
-            getMonthBlock.render();
-            dateBlock.parentBlock_.getInput('dates').connection.connect(getMonthBlock.outputConnection);
-            getMonthBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
-        }
-        else if(dateBlock.type == 'day') {
-            var getWeekBlock = this.workspace.newBlock('specified_week');
-            getWeekBlock.initSvg();
-            getWeekBlock.render();
-            dateBlock.parentBlock_.getInput('dates').connection.connect(getWeekBlock.outputConnection);
-            getWeekBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
-        }
-        this.workspace.render();
-    }
-};
+// Blockly.Blocks['replace_date'] = {
+//     init: function() {
+//         this.appendDummyInput()
+//             .appendField(new Blockly.FieldDropdown([["開始日", "start"], ["終了日", "end"]]), "property")
+//             .appendField("を");
+//         this.appendValueInput("dates")
+//             .setCheck(["year", "month", "week", "date", "day"])
+//         this.appendDummyInput()
+//             .appendField("に置き換える");
+//         this.setInputsInline(true);
+//         this.setPreviousStatement(true, "map");
+//         this.setNextStatement(true, "map");
+//         this.setColour(240);
+//         this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 年, 月, 週, 日, 曜日\n説明: 予定の開始/終了日を指定した日付ブロックで指定された日付に置き換えます。");
+//         this.setHelpUrl("");
+//         this.setOnChange(function(event) {
+//             var inputBlock = this.getInputTargetBlock('dates');
+//             if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
+//                 if (inputBlock && (inputBlock.type === 'month' || inputBlock.type === 'date' || inputBlock.type === 'day')) {
+//                     this.addGetEventBlock(inputBlock);
+//                 }
+//             }
+//         });
+//     },
+//     addGetEventBlock: function(dateBlock) {
+//         if(dateBlock.type === 'month') {
+//         var getYearBlock = this.workspace.newBlock('specified_year');
+//         getYearBlock.initSvg();  // 新しいブロックを初期化
+//         getYearBlock.render();  // ブロックを描画
+//         dateBlock.parentBlock_.getInput('dates').connection.connect(getYearBlock.outputConnection);  // year ブロックを先頭に接続
+//         getYearBlock.getInput('dates').connection.connect(dateBlock.outputConnection); // month ブロックを接続
+//         }
+//         else if(dateBlock.type === 'date') {
+//             var getMonthBlock = this.workspace.newBlock('specified_month');
+//             getMonthBlock.initSvg();
+//             getMonthBlock.render();
+//             dateBlock.parentBlock_.getInput('dates').connection.connect(getMonthBlock.outputConnection);
+//             getMonthBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
+//         }
+//         else if(dateBlock.type === 'day') {
+//             var getWeekBlock = this.workspace.newBlock('specified_week');
+//             getWeekBlock.initSvg();
+//             getWeekBlock.render();
+//             dateBlock.parentBlock_.getInput('dates').connection.connect(getWeekBlock.outputConnection);
+//             getWeekBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
+//         }
+//         this.workspace.render();
+//     }
+// };
 
-Blockly.Blocks['replace_time'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([["開始時刻","start"], ["終了時刻","end"]]), "property")
-            .appendField("を")
-        this.appendValueInput("time")
-            .setCheck("time")
-        this.appendDummyInput()
-            .appendField("に置き換える");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, "map");
-        this.setNextStatement(true, "map");
-        this.setColour(240);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
-        this.setHelpUrl("");
-    }
-};
+// Blockly.Blocks['replace_time'] = {
+//     init: function() {
+//         this.appendDummyInput()
+//             .appendField(new Blockly.FieldDropdown([["開始時刻","start"], ["終了時刻","end"]]), "property")
+//             .appendField("を")
+//         this.appendValueInput("time")
+//             .setCheck("time")
+//         this.appendDummyInput()
+//             .appendField("に置き換える");
+//         this.setInputsInline(true);
+//         this.setPreviousStatement(true, "map");
+//         this.setNextStatement(true, "map");
+//         this.setColour(240);
+//         this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 時刻\n説明: 予定の開始/終了時刻を指定した時刻ブロックの値に置き換えます。");
+//         this.setHelpUrl("");
+//     }
+// };
 
 // Blockly.Blocks['replace_map'] = {
 //     init: function() {
@@ -510,7 +510,7 @@ Blockly.Blocks['hide'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: \n説明: 「予定名」「場所」「説明」の中から選択した情報を隠します．");
+        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 加工\n説明: 指定したプロパティの表示を隠します。予定名は'予定'に置換されます。");
         this.setHelpUrl("");
     }
 };
@@ -543,7 +543,7 @@ Blockly.Blocks['move'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 日付\n説明: このブロックは取得した予定の日付を変更します．\n");
+        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 年, 月, 日, 曜日\n説明: 取得した予定の日時を指定した日付へ移動（変更）します。");
         this.setHelpUrl("");
     }
 };
@@ -561,7 +561,7 @@ Blockly.Blocks['if'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 抽出\n入力可能なブロックの型: 真偽値\n説明: 条件が真の場合に内部の処理を実行する条件分岐ブロックです。");
         this.setHelpUrl("");
     }
 };
@@ -576,7 +576,7 @@ Blockly.Blocks['and'] = {
         this.setInputsInline(false);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 真偽値, 曜日, 日, 週, 月, 年\n説明: 二つの条件を論理ANDで結合してBooleanを返します。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
@@ -615,7 +615,7 @@ Blockly.Blocks['or'] = {
         this.setInputsInline(false);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 真偽値\n説明: 二つの条件を論理ORで結合してBooleanを返します。");
         this.setHelpUrl("");
     }
 };
@@ -630,7 +630,7 @@ Blockly.Blocks['match'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: \n説明: 指定したプロパティに指定テキストが含まれるかを判定します（部分一致）。");
         this.setHelpUrl("");
     }
 };
@@ -661,7 +661,7 @@ Blockly.Blocks['date_match'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 年, 月, 日, 曜日, 週\n説明: 指定した日付ブロックと比較して予定の開始/終了日が条件を満たすか判定します。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             var inputBlock = this.getInputTargetBlock('dates');
@@ -714,21 +714,21 @@ Blockly.Blocks['date_match'] = {
     },
 
     addGetEventBlock: function(dateBlock) {
-        if(dateBlock.type == 'month') {
+        if(dateBlock.type === 'month') {
         var getYearBlock = this.workspace.newBlock('specified_year');
         getYearBlock.initSvg();  // 新しいブロックを初期化
         getYearBlock.render();  // ブロックを描画
         dateBlock.parentBlock_.getInput('dates').connection.connect(getYearBlock.outputConnection);  // year ブロックを先頭に接続
         getYearBlock.getInput('dates').connection.connect(dateBlock.outputConnection); // month ブロックを接続
         }
-        else if(dateBlock.type == 'date') {
+        else if(dateBlock.type === 'date') {
             var getMonthBlock = this.workspace.newBlock('specified_month');
             getMonthBlock.initSvg();
             getMonthBlock.render();
             dateBlock.parentBlock_.getInput('dates').connection.connect(getMonthBlock.outputConnection);
             getMonthBlock.getInput('dates').connection.connect(dateBlock.outputConnection);
         }
-        else if(dateBlock.type == 'day') {
+        else if(dateBlock.type === 'day') {
             var getWeekBlock = this.workspace.newBlock('specified_week');
             getWeekBlock.initSvg();
             getWeekBlock.render();
@@ -750,7 +750,7 @@ Blockly.Blocks['time_match'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 時刻\n説明: 指定した時刻ブロックと比較して予定の開始/終了時刻が条件を満たすか判定します。");
         this.setHelpUrl("");
     }
 };
@@ -765,7 +765,7 @@ Blockly.Blocks['year'] = {
         this.setInputsInline(false);
         this.setOutput(true, "year");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（年）\n入力可能なブロックの型: 月\n説明: 年を指定するブロックです。必要に応じて月ブロックを接続して日付を構成します。");
         this.setHelpUrl("");
     }
 };
@@ -781,7 +781,7 @@ Blockly.Blocks['month'] = {
         this.setInputsInline(false);
         this.setOutput(true, "month");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（月）\n入力可能なブロックの型: 日, 曜日\n説明: 月を指定するブロックです。必要に応じて日や曜日ブロックを接続します。");
         this.setHelpUrl("");
     }
 };
@@ -794,7 +794,7 @@ Blockly.Blocks['date'] = {
         this.setInputsInline(false);
         this.setOutput(true, "date");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（日）\n入力可能なブロックの型: \n説明: 日（1〜31）を指定するブロックです。日付指定に使用します。");
         this.setHelpUrl("");
     }
 };
@@ -808,7 +808,7 @@ Blockly.Blocks['day'] = {
         this.setInputsInline(false);
         this.setOutput(true, "day");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（曜日）\n入力可能なブロックの型: \n説明: 曜日を指定するブロックです（0=日曜〜6=土曜）。");
         this.setHelpUrl("");
     }
 };
@@ -823,7 +823,7 @@ Blockly.Blocks['specified_year'] = {
         this.setInputsInline(false);
         this.setOutput(true, "year");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（年・相対）\n入力可能なブロックの型: 月\n説明: 今年／来年／去年などの相対的な年を指定するブロックです。接続により表現が変わります。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             var monthConnection = this.getInputTargetBlock('month');
@@ -858,7 +858,7 @@ Blockly.Blocks['specified_month'] = {
         this.setInputsInline(false);
         this.setOutput(true, "month");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（月・相対）\n入力可能なブロックの型: 日, 曜日\n説明: 今月／来月／先月などの相対的な月を指定するブロックです。接続により表現が変わります。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             var dateConnection = this.getInputTargetBlock('date');
@@ -893,7 +893,7 @@ Blockly.Blocks['specified_week'] = {
         this.setInputsInline(false);
         this.setOutput(true, "week");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（週・相対）\n入力可能なブロックの型: 曜日\n説明: 今週／来週／先週などの相対的な週を指定するブロックです。接続により表現が変わります。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             var dayConnection = this.getInputTargetBlock('day');
@@ -927,7 +927,7 @@ Blockly.Blocks['specified_date'] = {
         this.setInputsInline(false);
         this.setOutput(true, "date");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（相対日）\n入力可能なブロックの型: \n説明: 今日／明日／昨日などの相対日を表すブロックです。" );
         this.setHelpUrl("");
     }
 };
@@ -944,7 +944,7 @@ Blockly.Blocks['time'] = {
         this.setInputsInline(false);
         this.setOutput(true, "time");
         this.setColour(120);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 日付（時刻）\n入力可能なブロックの型: \n説明: 時刻（時、分）を指定するブロックです。予定の開始／終了時刻指定に使用します。");
         this.setHelpUrl("");
     }
 };
@@ -958,7 +958,7 @@ Blockly.Blocks['total_hours'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setColour(60);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 集計\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定一覧の合計時間を計算して返します（時間単位）。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
@@ -990,7 +990,7 @@ Blockly.Blocks['total_events'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setColour(60);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 集計\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定一覧の件数を返します。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
@@ -1022,7 +1022,7 @@ Blockly.Blocks['text'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Text");
         this.setColour(60);
-        this.setTooltip("ブロックの型: \n入力可能なブロックの型: \n説明: ");
+        this.setTooltip("ブロックの型: 値（テキスト）\n入力可能なブロックの型: \n説明: テキストリテラルを表すブロックです。文字列を入力して使用します。");
         this.setHelpUrl("");
     }
 }
@@ -1054,7 +1054,7 @@ javascriptGenerator.forBlock['get_events'] = function(block) {
 javascriptGenerator.forBlock['insert_event'] = function(block) {
     var event = javascriptGenerator.valueToCode(block, 'event', javascriptGenerator.ORDER_ATOMIC);
     var calendar = javascriptGenerator.valueToCode(block, 'calendar', javascriptGenerator.ORDER_ATOMIC);
-    if(event == '') event = 'e';
+    if(event === '') event = 'e';
     var code = 'await insert_event('+event+', '+calendar+')\n';
     return code;
 };
@@ -1062,7 +1062,7 @@ javascriptGenerator.forBlock['insert_event'] = function(block) {
 javascriptGenerator.forBlock['insert_event2'] = function(block) {
     var event = javascriptGenerator.valueToCode(block, 'event', javascriptGenerator.ORDER_ATOMIC);
     var calendar = javascriptGenerator.valueToCode(block, 'calendar', javascriptGenerator.ORDER_ATOMIC);
-    if(event == '') event = 'e';
+    if(event === '') event = 'e';
     var code = 'await insert_event('+event+', '+calendar+')\n';
     return code;
 };
@@ -1077,7 +1077,7 @@ javascriptGenerator.forBlock['update_event'] = function(block) {
 javascriptGenerator.forBlock['delete_event'] = function(block) {
     var event = javascriptGenerator.valueToCode(block, 'event', javascriptGenerator.ORDER_ATOMIC);
     var calendar = javascriptGenerator.valueToCode(block, 'calendar', javascriptGenerator.ORDER_ATOMIC);
-    if(event == '') event = 'e';
+    if(event === '') event = 'e';
     var code = 'await delete_event('+event+', '+calendar+')\n';
     return code;
 };
@@ -1167,7 +1167,7 @@ javascriptGenerator.forBlock['replace_time'] = function(block) {
 javascriptGenerator.forBlock['hide'] = function(block) {
     var property = block.getFieldValue('property');
     var code;
-    if(property == 'summary') {
+    if(property === 'summary') {
         code = 'e.'+property+'="予定";\n';
     }else {
         code = 'e.'+property+'="";\n';
@@ -1179,7 +1179,7 @@ javascriptGenerator.forBlock['hide_test'] = function(block) {
     var property = block.getFieldValue('property');
     var calendar = javascriptGenerator.valueToCode(block, 'calendar', javascriptGenerator.ORDER_ATOMIC);
     var code;
-    if(property == 'summary') {
+    if(property === 'summary') {
         code = 'e.'+property+'="予定";\n';
     }else {
         code = 'e.'+property+'="";\n';
@@ -1259,7 +1259,7 @@ javascriptGenerator.forBlock['month'] = function(block) {
     var month = block.getFieldValue('month');
     var date = javascriptGenerator.valueToCode(block, 'date', javascriptGenerator.ORDER_ATOMIC) || null;
     var day = javascriptGenerator.valueToCode(block, 'day', javascriptGenerator.ORDER_ATOMIC) || null;
-    var code = 'M' + (month.length == 1 ? '0' + month : month);
+    var code = 'M' + (month.length === 1 ? '0' + month : month);
     if(date) {
         code = code + date;
     }else if(day) {
@@ -1270,7 +1270,7 @@ javascriptGenerator.forBlock['month'] = function(block) {
 
 javascriptGenerator.forBlock['date'] = function(block) {
     var date = block.getFieldValue('date').toString();
-    var code = 'D' + (date.length == 1 ? '0' + date : date);
+    var code = 'D' + (date.length === 1 ? '0' + date : date);
     return [code, javascriptGenerator.ORDER_ATOMIC];
 };
 
@@ -1368,7 +1368,7 @@ pythonGenerator.forBlock['get_events'] = function(block) {
 pythonGenerator.forBlock['insert_event'] = function(block) {
     var event = pythonGenerator.valueToCode(block, 'event', pythonGenerator.ORDER_ATOMIC);
     var calendar = pythonGenerator.valueToCode(block, 'calendar', pythonGenerator.ORDER_ATOMIC);
-    if(event == '') event = 'e';
+    if(event === '') event = 'e';
     var code = 'insert_event('+event+', '+calendar+')\n';
     return code;
 };
@@ -1376,7 +1376,7 @@ pythonGenerator.forBlock['insert_event'] = function(block) {
 pythonGenerator.forBlock['insert_event1'] = function(block) {
     var event = pythonGenerator.valueToCode(block, 'event', pythonGenerator.ORDER_ATOMIC);
     var calendar = pythonGenerator.valueToCode(block, 'calendar', pythonGenerator.ORDER_ATOMIC);
-    if(event == '') event = 'e';
+    if(event === '') event = 'e';
     var code = 'insert_event('+event+', '+calendar+')\n';
     return code;
 };
@@ -1384,7 +1384,7 @@ pythonGenerator.forBlock['insert_event1'] = function(block) {
 pythonGenerator.forBlock['insert_event2'] = function(block) {
     var event = pythonGenerator.valueToCode(block, 'event', pythonGenerator.ORDER_ATOMIC);
     var calendar = pythonGenerator.valueToCode(block, 'calendar', pythonGenerator.ORDER_ATOMIC);
-    if(event == '') event = 'e';
+    if(event === '') event = 'e';
     var code = 'insert_event('+event+', '+calendar+')\n';
     return code;
 };
@@ -1392,7 +1392,7 @@ pythonGenerator.forBlock['insert_event2'] = function(block) {
 pythonGenerator.forBlock['update_event'] = function(block) {
     var event = pythonGenerator.valueToCode(block, 'event', pythonGenerator.ORDER_ATOMIC);
     var calendar = pythonGenerator.valueToCode(block, 'calendar', pythonGenerator.ORDER_ATOMIC);
-    if(event == '') event = 'e';
+    if(event === '') event = 'e';
     var code = 'insert_event('+event+', '+calendar+')\n';
     return code;
 };
@@ -1400,7 +1400,7 @@ pythonGenerator.forBlock['update_event'] = function(block) {
 pythonGenerator.forBlock['delete_event'] = function(block) {
     var event = pythonGenerator.valueToCode(block, 'event', pythonGenerator.ORDER_ATOMIC);
     var calendar = pythonGenerator.valueToCode(block, 'calendar', pythonGenerator.ORDER_ATOMIC);
-    if(event == '') event = 'e';
+    if(event === '') event = 'e';
     var code = 'insert_event('+event+', '+calendar+')\n';
     return code;
 };
@@ -1554,7 +1554,7 @@ pythonGenerator.forBlock['date_match'] = function(block) {
 pythonGenerator.forBlock['year'] = function(block) {
     var month = pythonGenerator.valueToCode(block, 'month', pythonGenerator.ORDER_ATOMIC);
     var year = block.getFieldValue('year');
-    if(month != '')month = '-' + month;
+    if(month !== '')month = '-' + month;
     var code = year + month;
     return [code, pythonGenerator.ORDER_NONE];
 };
@@ -1562,7 +1562,7 @@ pythonGenerator.forBlock['year'] = function(block) {
 pythonGenerator.forBlock['month'] = function(block) {
     var date = pythonGenerator.valueToCode(block, 'date', pythonGenerator.ORDER_ATOMIC);
     var month = block.getFieldValue('month');
-    if(date != '')date = '-' + date;
+    if(date !== '')date = '-' + date;
     var code = month + date;
     return [code, pythonGenerator.ORDER_ATOMIC];
 };

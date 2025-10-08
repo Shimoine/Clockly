@@ -4,6 +4,7 @@ import * as Blockly from 'blockly';
 import { Button, Modal, Row, Col } from "react-bootstrap";
 
 import './Blocks.js';
+import generateAllBlocksXml from './AllBlocksXml';
 
 var calendar_list = [];  // TODO: state を使う
 
@@ -104,7 +105,10 @@ function UseBlockly(props) {
                     </value>
                 </block>
                 <label text="条件" web-class="myLabelStyle"></label>
-                <block type="match"></block>
+                <block type="match">
+                    <field name="property">summary</field>
+                    <field name="text">ここに入力</field>
+                </block>
                 <block type="date_match">
                     <value name="dates">
                         <shadow type="dummy_value" colour="230">
@@ -188,7 +192,10 @@ function UseBlockly(props) {
                     </value>
                 </block>
             <label text="加工" web-class="myLabelStyle"></label>
-                <block type="replace_name"></block>
+                <block type="replace_name">
+                    <field name="property">summary</field>
+                    <field name="text">ここに入力</field>
+                </block>
                 <block type="hide"></block>
                 <block type="move">
                     <value name="date">
@@ -262,7 +269,6 @@ function UseBlockly(props) {
                     calendar_list.push([calendar.summary, calendar.id]);
                 })
                 calendar_list.sort((a, b) => a[0].localeCompare(b[0]));
-                console.log(calendars);
                 //setCalendarList(calendars)
             });
 
@@ -361,7 +367,6 @@ function UseBlockly(props) {
 
             // 利用可能なブロック定義を取得
             const availableBlocks = getBlockDefinitions();
-            console.log("Available Blocks:", availableBlocks);
 
             // サーバーから利用可能なカレンダー一覧を取得して送信
             let availableCalendars = [];
@@ -372,7 +377,6 @@ function UseBlockly(props) {
             } else {
                 availableCalendars = []; 
             }
-            console.log("Available Calendars:", availableCalendars);
 
             // AIへのフィールド名ヒント（モデルに既存のフィールド名を使わせる）
             const fieldNameHints = {
@@ -384,7 +388,7 @@ function UseBlockly(props) {
             const requestData = {
                 currentWorkspace: currentXmlText,
                 availableBlocks: availableBlocks,
-                toolboxExample: xml,
+                xmlExample: generateAllBlocksXml(Blockly, props.workspace),
                 ruleName: props.ruleName,
                 availableCalendars: availableCalendars,
                 fieldNameHints: fieldNameHints
@@ -404,8 +408,6 @@ function UseBlockly(props) {
             }
 
             const result = await response.json();
-            console.log(result.completedXml)
-            
             if (result.completedXml) {
                 // 補完前後の比較プレビューを準備
                 setPreviewData({
