@@ -16,6 +16,7 @@ function PageOfMakeRule(props) {
     const [jsCode, setJsCode] = useState('');
     const [rbCode, setRbCode] = useState('');
     const [selectedTab, setSelectedTab] = useState(0);
+    const [currentXmlText, setCurrentXmlText] = useState('');
     const [library, setLibrary] = useState({id: [], name: [], xml: [] });
     const location = useLocation();
 
@@ -178,6 +179,10 @@ function PageOfMakeRule(props) {
         if (index === 2) { // Rubyタブが選択されたとき
             setRbCode(pythonGenerator.workspaceToCode(workspace));
         }
+        if (index === 3) { // XMLタブが選択されたとき
+            const xmlText = workspace ? Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)) : (blockXml || '');
+            setCurrentXmlText(xmlText);
+        }
     };
 
     useEffect(() => {
@@ -197,6 +202,7 @@ function PageOfMakeRule(props) {
                     <Tab>Blockly</Tab>
                     <Tab>JavaScript</Tab>
                     <Tab>Ruby</Tab>
+                    <Tab>XML</Tab>
                     <Tab>Library</Tab>
                 </TabList>
                 <TabPanel>
@@ -207,6 +213,9 @@ function PageOfMakeRule(props) {
                 </TabPanel>
                 <TabPanel>
                     <pre><code>{rbCode}</code></pre>
+                </TabPanel>
+                <TabPanel>
+                    <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}><code>{currentXmlText}</code></pre>
                 </TabPanel>
                 <TabPanel>
                     <pre>
