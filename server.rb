@@ -332,11 +332,9 @@ post '/gemini-completion' do
         puts "Received request for Gemini completion"
         data = JSON.parse(request.body.read)
         current_workspace = data['currentWorkspace']
-        available_blocks = data['availableBlocks']
         xml_example = data['xmlExample']
         rule_name = data['ruleName']
         available_calendars = data['availableCalendars'] || []
-        field_name_hints = data['fieldNameHints'] || {}
 
         puts "Current Workspace: #{current_workspace}\n\n\n"
         puts "Rule Name: #{rule_name}\n\n\n"
@@ -396,7 +394,6 @@ post '/gemini-completion' do
 完成したBlockly XMLのみを返してください。説明文は不要です。
 
 現在のワークスペース: \n#{current_workspace} \n
-利用可能なブロック定義: \n#{available_blocks.to_json} \n
 XML例（ブロックの書き方参考）:\n#{xml_example}"
                 }]
             }],

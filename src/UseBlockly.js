@@ -291,65 +291,6 @@ function UseBlockly(props) {
         });
     }
 
-    // ブロック定義を取得する関数
-    const getBlockDefinitions = () => {
-        if (!props.workspace) {
-            return {};
-        }
-        
-        const blockDefinitions = {};
-        const registeredBlocks = Object.keys(Blockly.Blocks);
-        
-        // 標準ブロック（エラーが発生するもの）をスキップするリスト
-        const skipBlocks = [
-            'variables_get_dynamic', 'variables_set_dynamic', 'variables_get', 'variables_set',
-            'text_join', 'text_charAt', 'text_prompt', 'math_number_property', 'math_on_list',
-            'controls_for', 'controls_forEach', 'controls_flow_statements', 'controls_if',
-            'logic_compare', 'logic_ternary', 'procedures_defnoreturn', 'procedures_defreturn',
-            'procedures_callnoreturn', 'procedures_callreturn', 'procedures_ifreturn',
-            'lists_create_with', 'lists_repeat', 'lists_indexOf', 'lists_getIndex',
-            'lists_setIndex', 'lists_getSublist', 'lists_split', 'lists_sort'
-        ];
-        
-        registeredBlocks.forEach(blockType => {
-            // 標準ブロックをスキップ
-            if (skipBlocks.includes(blockType) || blockType.startsWith('variables_') || 
-                blockType.startsWith('procedures_') || blockType.startsWith('controls_') ||
-                blockType.startsWith('logic_') || blockType.startsWith('math_') ||
-                blockType.startsWith('text_') || blockType.startsWith('lists_') ||
-                blockType.startsWith('colour_')) {
-                return;
-            }
-            
-            const block = Blockly.Blocks[blockType];
-            if (block && block.init) {
-                try {
-                    const tempBlock = new Blockly.Block(props.workspace, blockType);
-                    block.init.call(tempBlock);
-                    
-                    blockDefinitions[blockType] = {
-                        type: blockType,
-                        message0: tempBlock.interpolateMsg || tempBlock.message0 || '',
-                        args0: tempBlock.args0 || [],
-                        inputsInline: tempBlock.inputsInline,
-                        output: tempBlock.outputConnection?.getCheck() || null,
-                        colour: tempBlock.colour_ || '',
-                        tooltip: tempBlock.tooltip || '',
-                        helpUrl: tempBlock.helpUrl || '',
-                        previousStatement: tempBlock.previousConnection ? true : false,
-                        nextStatement: tempBlock.nextConnection ? true : false
-                    };
-                    
-                    tempBlock.dispose();
-                } catch (error) {
-                    console.warn(`ブロック ${blockType} の処理中にエラー:`, error);
-                }
-            }
-        });
-        
-        return blockDefinitions;
-    };
-
     // AI補完処理を実行する関数
     const handleAICompletion = async () => {
         if (!props.ruleName) {
@@ -365,9 +306,6 @@ function UseBlockly(props) {
             currentXml.querySelectorAll("block").forEach(b => b.removeAttribute("id")); //id 属性を削除して比較を容易にする
             const currentXmlText = Blockly.Xml.domToText(currentXml);
 
-            // 利用可能なブロック定義を取得
-            const availableBlocks = getBlockDefinitions();
-
             // サーバーから利用可能なカレンダー一覧を取得して送信
             let availableCalendars = [];
             const resp = await fetch('/calendar_list');
@@ -378,20 +316,11 @@ function UseBlockly(props) {
                 availableCalendars = []; 
             }
 
-            // AIへのフィールド名ヒント（モデルに既存のフィールド名を使わせる）
-            const fieldNameHints = {
-                calendarSummaryField: 'summary',
-                calendarIdField: 'id',
-                textField: 'text'
-            };
-
             const requestData = {
                 currentWorkspace: currentXmlText,
-                availableBlocks: availableBlocks,
                 xmlExample: generateAllBlocksXml(Blockly, props.workspace),
                 ruleName: props.ruleName,
-                availableCalendars: availableCalendars,
-                fieldNameHints: fieldNameHints
+                availableCalendars: availableCalendars
             };
 
             // Gemini APIに送信
