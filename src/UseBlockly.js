@@ -303,7 +303,8 @@ function UseBlockly(props) {
         try {
             // 現在のワークスペースのXMLを取得
             const currentXml = Blockly.Xml.workspaceToDom(props.workspace);
-            currentXml.querySelectorAll("block").forEach(b => b.removeAttribute("id")); //id 属性を削除して比較を容易にする
+            // block と shadow の id 属性を削除して比較を容易にする
+            currentXml.querySelectorAll("block, shadow").forEach(b => b.removeAttribute("id")); //id 属性を削除して比較を容易にする
             const currentXmlText = Blockly.Xml.domToText(currentXml);
 
             // サーバーから利用可能なカレンダー一覧を取得して送信
