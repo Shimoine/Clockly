@@ -143,24 +143,24 @@ Blockly.Blocks['insert_event'] = {
     }
 };
 
-Blockly.Blocks['update_event'] = {
-    init: function() {
-        this.appendValueInput("calendar1")
-            .setCheck("Calendar");
-        this.appendDummyInput("dummy")
-            .appendField("の予定を");
-        this.appendValueInput("calendar2")
-            .setCheck("Calendar");
-        this.appendDummyInput("dummy")
-            .appendField("に同期");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, "map");
-        this.setNextStatement(true, "map");
-        this.setColour(210);
-        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: カレンダ\n説明: カレンダ1の予定をカレンダ2に同期（コピーまたは更新）します。複数カレンダ間での同期処理に利用します。");
-        this.setHelpUrl("");
-    },
-};
+// Blockly.Blocks['update_event'] = {
+//     init: function() {
+//         this.appendValueInput("calendar1")
+//             .setCheck("Calendar");
+//         this.appendDummyInput("dummy")
+//             .appendField("の予定を");
+//         this.appendValueInput("calendar2")
+//             .setCheck("Calendar");
+//         this.appendDummyInput("dummy")
+//             .appendField("に同期");
+//         this.setInputsInline(true);
+//         this.setPreviousStatement(true, "map");
+//         this.setNextStatement(true, "map");
+//         this.setColour(210);
+//         this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: カレンダ\n説明: カレンダ1の予定をカレンダ2に同期（コピーまたは更新）します。複数カレンダ間での同期処理に利用します。");
+//         this.setHelpUrl("");
+//     },
+// };
 
 Blockly.Blocks['delete_event'] = {
     init: function() {
@@ -576,7 +576,7 @@ Blockly.Blocks['and'] = {
         this.setInputsInline(false);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 真偽値, 曜日, 日, 週, 月, 年\n説明: 二つの条件を論理ANDで結合してBooleanを返します。");
+        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 真偽値\n説明: 二つの条件を論理ANDで結合してBooleanを返します。");
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {

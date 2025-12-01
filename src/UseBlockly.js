@@ -51,18 +51,6 @@ function UseBlockly(props) {
                         </shadow>
                     </value>
                 </block>
-                <block type="update_event">
-                    <value name="calendar1">
-                        <shadow type="dummy_value" colour="230">
-                            <field name="text">カレンダ</field>
-                        </shadow>
-                    </value>
-                    <value name="calendar2">
-                        <shadow type="dummy_value" colour="230">
-                            <field name="text">カレンダ</field>
-                        </shadow>
-                    </value>
-                </block>
                 <block type="delete_event">
                     <value name="event">
                         <shadow type="dummy_value" colour="230">
@@ -316,6 +304,8 @@ function UseBlockly(props) {
             } else {
                 availableCalendars = []; 
             }
+
+            console.log(generateAllBlocksXml(Blockly, props.workspace))
 
             const requestData = {
                 currentWorkspace: currentXmlText,

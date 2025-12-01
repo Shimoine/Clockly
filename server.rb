@@ -7,6 +7,8 @@ require 'googleauth/stores/file_token_store'
 require 'dotenv/load'
 require 'net/http'
 require 'uri'
+require 'cgi'
+
 
 DB_PATH = "./db/"
 
@@ -15,6 +17,22 @@ Dotenv.load
 enable :cross_origin
 
 set :public_folder, 'build'
+
+def remove_code_blocks(text)
+    return '' if text.nil?
+    
+    # ```xml または ``` で始まる行を削除（開始マーカー）
+    text = text.gsub(/^```[a-z]*\s*$/m, '')
+    
+    # 単独の ``` 行を削除（終了マーカー）
+    text = text.gsub(/^```\s*$/m, '')
+    
+    text
+end
+
+#####################################################
+# ファイル入出力部
+#####################################################
 
 def file_load(key)
     begin
@@ -325,6 +343,42 @@ end
 # AI補完機能
 #####################################################
 
+# 会話履歴をファイルから読み込む
+def load_chat_history(session_id)
+    history_file = "#{DB_PATH}chat-history.json"
+    return [] unless File.exist?(history_file)
+    
+    begin
+        content = File.read(history_file)
+        return [] if content.strip.empty?
+        
+        all_histories = JSON.parse(content)
+        all_histories[session_id] || []
+    rescue => e
+        STDERR.puts "Failed to load chat history: #{e.message}"
+        []
+    end
+end
+
+# 会話履歴をファイルに保存する
+def save_chat_history(session_id, chat_history)
+    history_file = "#{DB_PATH}chat-history.json"
+    
+    begin
+        all_histories = {}
+        if File.exist?(history_file)
+            content = File.read(history_file)
+            all_histories = JSON.parse(content) unless content.strip.empty?
+        end
+        
+        all_histories[session_id] = chat_history
+        File.write(history_file, JSON.pretty_generate(all_histories))
+        STDERR.puts "Chat history saved for session: #{session_id}"
+    rescue => e
+        STDERR.puts "Failed to save chat history: #{e.message}"
+    end
+end
+
 post '/gemini-completion' do
     content_type :json
     
@@ -443,6 +497,256 @@ XML例（ブロックの書き方参考）:\n#{xml_example}"
         puts "General Error: #{e.message}"
         puts e.backtrace
         return { error: "Internal server error: #{e.message}" }.to_json
+    end
+end
+
+post '/gemini-ask' do
+    request.body.rewind
+    body = JSON.parse(request.body.read)
+    prompt = body["userMessage"] or halt 400, "missing prompt"
+    current_workspace = body["currentWorkspace"] || ""
+    rule_name = body["ruleName"] || ""
+    xml_example = body["xmlExample"] || ""
+    available_calendars = body['availableCalendars'] || []
+    session_id = body["sessionId"] || "default"
+
+    api_key = ENV['GEMINI_API_KEY'] or halt 500, "GEMINI_API_KEY not set"
+
+    # ファイルから会話履歴を読み込む
+    chat_history = load_chat_history(session_id)
+
+    system_instruction = {
+        role: "system",
+        parts: [
+            {
+                text: "あなたは Blockly を用いたシステム (Clockly) のプログラミングアシスタントです．以下のルールに”必ず”従って，送られてくる質問に答えてください．
+### 基本ルール
+- 決して任意の field name，value name を生成しないでください．
+- 例えば calendarSummaryField, calendarIdField, TEXT などの新しい field name を作らないでください．
+- カレンダーブロックは必ず次の正確な形式を使ってください（例）：
+
+<block type=\"calendar\">
+  <field name=\"summary\">マイカレンダ</field>
+  <field name=\"id\">nomura.laboratory@gmail.com</field>
+</block>
+
+- カレンダーブロックで使用する summary と id の値は、必ず利用可能なカレンダー一覧にあるものを使ってください。存在しないカレンダー名や ID を勝手に生成しないこと
+- 利用可能なブロックは「利用可能な XML 一覧」に記載されているもののみです．
+- 出力は出力形式に”必ず”従って出力してください．
+- 質問者の作成しようとしているプログラム名は「#{rule_name}」です．
+- 質問者の現在のワークスペースは以下の通りです．
+#{current_workspace}
+
+
+### 出力形式 (重要・厳守)
+- 回答は Blockly XML と解説文に分けて出力してください．
+- Blockly XML は <xml xmlns=\"https://developers.google.com/blockly/xml\"> タグで始まり </xml> タグで終わる形式にしてください．
+- **絶対に XML を ```xml、```、`` などのマークダウン記法で囲まないでください！**
+- **XML はそのまま生のテキストとして、マークダウン記法なしで出力してください！**
+- **コードブロック（```）は一切使用しないでください！**
+- 解説文は Blockly XML の後に改行を2つ挟んで出力してください．
+
+【正しい出力例】
+
+ここに会話文が入ります．
+
+<xml xmlns=\"https://developers.google.com/blockly/xml\">
+  <block type=\"calendar\">
+    <field name=\"summary\">マイカレンダ</field>
+    <field name=\"id\">calendar@gmail.com</field>
+  </block>
+</xml>
+
+ここに解説文が入ります．
+
+【間違った出力例（絶対にこうしないこと）】
+
+```xml
+<xml xmlns=\"https://developers.google.com/blockly/xml\">
+  ...
+</xml>
+```
+
+
+- 解説文が不要な場合は，Blockly XML のみを出力してください．
+- XML が不要な場合は，テキストのみを出力してください．
+
+
+### 利用可能な XML 一覧
+#{xml_example}
+###
+
+### 利用可能なカレンダー一覧
+#{available_calendars.map{|c| "- #{c['summary']} (id: #{c['id']})"}.join("\n")}
+###
+"
+            }
+        ]
+    }
+
+    puts "System Instruction:\n"
+    puts system_instruction[:parts][0][:text]
+
+    # ストリーミング用のURI
+    uri = URI("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:streamGenerateContent?alt=sse&key=#{api_key}")
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.open_timeout = 60
+    http.read_timeout = 3600
+
+    req = Net::HTTP::Post.new(uri.request_uri)
+    req["Content-Type"] = "application/json"
+    req["Accept"] = "text/event-stream"
+    req["Connection"] = "keep-alive"
+    
+    request_body = {
+        generationConfig: {
+            maxOutputTokens: 8192,
+            temperature: 0.7
+        }
+    }
+    
+    # 会話履歴全体を送信
+    contents = []
+    chat_history.each do |msg|
+        role = msg["role"] == "user" ? "user" : "model"
+        contents << {
+            role: role,
+            parts: [{ text: msg["text"] }]
+        }
+    end
+    # 現在のユーザーメッセージを追加
+    contents << {
+        role: "user",
+        parts: [{ text: prompt }]
+    }
+    request_body[:contents] = contents
+    request_body[:system_instruction] = system_instruction
+
+    req.body = request_body.to_json
+
+    content_type 'text/event-stream'
+    headers 'Cache-Control' => 'no-cache', 'Connection' => 'keep-alive', 'X-Accel-Buffering' => 'no'
+
+    # アシスタントの回答を蓄積する変数
+    assistant_response = ""
+
+    stream(:keep_open) do |out|
+        buffer = ""
+
+        begin
+            http.request(req) do |resp|
+                resp.read_body do |chunk|
+                    chunk.each_line do |line|
+                        line.chomp!
+                        next if line.strip.empty?
+
+                        payload = line.start_with?("data: ") ? line.sub(/^data: /, '') : line
+
+                        if payload.strip == "[DONE]"
+                            out << "data: [DONE]\n\n"
+                            out.flush if out.respond_to?(:flush)
+                            next
+                        end
+
+                        parsed = nil
+                        begin
+                            parsed = JSON.parse(payload)
+                        rescue JSON::ParserError
+                            buffer << payload
+                            begin
+                                parsed = JSON.parse(buffer)
+                                buffer = ""
+                            rescue JSON::ParserError
+                                parsed = nil
+                            end
+                        end
+
+                        if parsed
+                            items = parsed.is_a?(Array) ? parsed : [parsed]
+                            items.each do |obj|
+                                content_parts = obj.dig('candidates',0,'content','parts') || []
+                                text_full = content_parts.map{|p| p['text'].to_s}.join
+                                next if text_full.to_s.strip.empty?
+                                text_full = remove_code_blocks(text_full)
+                                assistant_response += text_full
+                                out << "data: #{text_full.to_json}\n\n"
+                                out.flush if out.respond_to?(:flush)
+                            end
+                        end
+                    end
+                end
+            end
+
+            out << "data: [DONE]\n\n"
+            out.flush if out.respond_to?(:flush)
+            
+            # ストリーミング終了後、会話履歴を更新して保存
+            chat_history << { "role" => "user", "text" => prompt }
+            chat_history << { "role" => "assistant", "text" => assistant_response }
+            save_chat_history(session_id, chat_history)
+        rescue => e
+            out << "data: {\"error\": \"#{e.message}\"}\n\n"
+            out.flush if out.respond_to?(:flush)
+        ensure
+            out.close
+        end
+    end
+end
+
+# 会話履歴を取得するエンドポイント
+get '/chat-history/:session_id' do
+    session_id = params[:session_id]
+    history = load_chat_history(session_id)
+    json history
+end
+
+# すべてのセッションIDを取得するエンドポイント
+get '/chat-sessions' do
+    history_file = "#{DB_PATH}chat-history.json"
+    
+    begin
+        if File.exist?(history_file)
+            content = File.read(history_file)
+            return json [] if content.strip.empty?
+            
+            all_histories = JSON.parse(content)
+            sessions = all_histories.map do |session_id, messages|
+                first_user_message = messages.find { |m| m["role"] == "user" }
+                {
+                    id: session_id,
+                    title: first_user_message ? first_user_message["text"].slice(0, 30) : "新しいチャット",
+                    message_count: messages.length,
+                    created_at: session_id.split('_')[1]&.to_i || 0
+                }
+            end
+            json sessions.sort_by { |s| -s[:created_at] }
+        else
+            json []
+        end
+    rescue => e
+        STDERR.puts "Failed to load chat sessions: #{e.message}"
+        json []
+    end
+end
+
+# 会話履歴を削除するエンドポイント
+delete '/chat-history/:session_id' do
+    session_id = params[:session_id]
+    history_file = "#{DB_PATH}chat-history.json"
+    
+    begin
+        if File.exist?(history_file)
+            all_histories = JSON.parse(File.read(history_file))
+            all_histories.delete(session_id)
+            File.write(history_file, JSON.pretty_generate(all_histories))
+        end
+        status 200
+        { message: "会話履歴を削除しました" }.to_json
+    rescue => e
+        status 500
+        { error: "削除に失敗しました: #{e.message}" }.to_json
     end
 end
 
