@@ -8,6 +8,7 @@ import UseBlockly from './UseBlockly'
 import * as Blockly from 'blockly';
 import { javascriptGenerator } from 'blockly/javascript';
 import { pythonGenerator } from 'blockly/python';
+import { handleTabSelect as handleTabSelectUtil } from './tabHandlers';
 import ChatSidebar from './ChatSidebar'
 import 'react-tabs/style/react-tabs.css';
 
@@ -18,6 +19,7 @@ function PageOfMakeRule(props) {
     const [rbCode, setRbCode] = useState('');
     const [workspace, setWorkspace] = useState(null);
     const [currentXmlText, setCurrentXmlText] = useState('');
+    const [jsonCode, setJsonCode] = useState('');
     const [selectedTab, setSelectedTab] = useState(0);
     const [library, setLibrary] = useState({id: [], name: [], xml: [] });
     const location = useLocation();
@@ -166,19 +168,13 @@ function PageOfMakeRule(props) {
 
     const handleTabSelect = (index) => {
         setSelectedTab(index);
-        if (index === 0) { // Blocklyタブが選択されたとき
-            setBlockXml(Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)));
-        }
-        if (index === 1) { // JavaScriptタブが選択されたとき
-            setJsCode(javascriptGenerator.workspaceToCode(workspace));
-        }
-        if (index === 2) { // Rubyタブが選択されたとき
-            setRbCode(pythonGenerator.workspaceToCode(workspace));
-        }
-        if (index === 3) { // XMLタブが選択されたとき
-            const xmlText = workspace ? Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)) : (blockXml || '');
-            setCurrentXmlText(xmlText);
-        }
+        handleTabSelectUtil(index, workspace, blockXml, {
+            setBlockXml,
+            setJsCode,
+            setRbCode,
+            setCurrentXmlText,
+            setJsonCode
+        });
     };
 
     useEffect(() => {
@@ -208,6 +204,7 @@ function PageOfMakeRule(props) {
                             <Tab>JavaScript</Tab>
                             <Tab>Ruby</Tab>
                             <Tab>XML</Tab>
+                            <Tab>JSON</Tab>
                             <Tab>Library</Tab>
                         </TabList>
                         <TabPanel>
@@ -221,6 +218,9 @@ function PageOfMakeRule(props) {
                         </TabPanel>
                         <TabPanel>
                             <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}><code>{currentXmlText}</code></pre>
+                        </TabPanel>
+                        <TabPanel>
+                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}><code>{jsonCode}</code></pre>
                         </TabPanel>
                         <TabPanel>
                             <pre>
