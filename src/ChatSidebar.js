@@ -1,26 +1,48 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Button from 'react-bootstrap/Button'
 import * as Blockly from 'blockly'
-import generateAllBlocksXml from './AllBlocksXml'
+
+import generateAllBlocksXmlWithDTDWithTooltip, { generateAllBlocksXmlWithDTD } from './AllblockXmlWithDTDWithTooltip' // xml DTDありtooltipあり
+import generateAllBlocksXmlWithDTDWithoutTooltip from './AllBlocksXmlWithDTDWithoutTooltip' // xml DTDありtooltipなし
+import generateAllBlocksXml from './AllBlocksXml' // xml DTDなしtooltipあり
+import generateAllBlocksXmlWithoutDTDWithoutTooltip from './AllBlocksXmlWithoutDTDWithoutTooltip' // xml DTDなしtooltipなし
 
 // XMLを含むテキストを解析してXML部分と説明部分に分離する
 function parseMessageWithXML(text) {
-    const xmlRegex = /<xml[^>]*>[\s\S]*?<\/xml>/
-    const xmlMatch = text.match(xmlRegex)
-    if (xmlMatch) {
-        const xmlContent = xmlMatch[0]
-        const beforeXML = text.substring(0, xmlMatch.index).trim()
-        const afterXML = text.substring(xmlMatch.index + xmlContent.length).trim()
-        
-        // beforeとafterを配列で返す（空文字列は除外しない）
-        const parts = []
-        if (beforeXML) parts.push(beforeXML)
-        parts.push('__XML__')  // XMLの位置を示すマーカー
-        if (afterXML) parts.push(afterXML)
-        
-        return { hasXML: true, xmlContent, parts, beforeXML, afterXML }
+    const xmlRegex = /<xml[^>]*>[\s\S]*?<\/xml>/g
+    const matches = [...text.matchAll(xmlRegex)]
+    
+    if (matches.length === 0) {
+        return { hasXML: false, text }
     }
-    return { hasXML: false, text }
+    
+    // XMLブロックとテキストを順番に配列に格納
+    const parts = []
+    let lastIndex = 0
+    
+    matches.forEach((match, index) => {
+        const xmlContent = match[0]
+        const xmlStartIndex = match.index
+        
+        // XML前のテキスト
+        const beforeText = text.substring(lastIndex, xmlStartIndex).trim()
+        if (beforeText) {
+            parts.push({ type: 'text', content: beforeText })
+        }
+        
+        // XMLブロック
+        parts.push({ type: 'xml', content: xmlContent })
+        
+        lastIndex = xmlStartIndex + xmlContent.length
+    })
+    
+    // 最後のXML以降のテキスト
+    const afterText = text.substring(lastIndex).trim()
+    if (afterText) {
+        parts.push({ type: 'text', content: afterText })
+    }
+    
+    return { hasXML: true, parts }
 }
 
 // Blocklyワークスペースを表示するコンポーネント
@@ -148,7 +170,6 @@ function markdownToHtml(text) {
     return text
 }
 
-// 追加: 簡易HTMLサニタイズ関数（許可タグのみ残し、属性は限定）
 function sanitizeHtml(dirty) {
 	// 空値は空文字列を返す
 	if (!dirty) return ''
@@ -662,13 +683,19 @@ export default function ChatSidebar({ workspace, ruleName, open = false, onOpenC
                                                     </span>
                                                 ) : parsed.hasXML ? (
                                                     <>
-                                                        {parsed.beforeXML && <div style={{ marginBottom: '8px' }} dangerouslySetInnerHTML={{ __html: sanitizeHtml(parsed.beforeXML) }} />}
-                                                        <BlocklyPreview 
-                                                            xmlContent={parsed.xmlContent} 
-                                                            onAddToWorkspace={handleAddToWorkspace}
-                                                            onReplaceWorkspace={handleReplaceWorkspace}
-                                                        />
-                                                        {parsed.afterXML && <div style={{ marginTop: '8px' }} dangerouslySetInnerHTML={{ __html: sanitizeHtml(parsed.afterXML) }} />}
+                                                        {parsed.parts.map((part, partIndex) => (
+                                                            part.type === 'text' ? (
+                                                                <div key={partIndex} style={{ marginBottom: partIndex < parsed.parts.length - 1 ? '8px' : 0, marginTop: partIndex > 0 ? '8px' : 0 }} 
+                                                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(part.content) }} />
+                                                            ) : (
+                                                                <BlocklyPreview 
+                                                                    key={partIndex}
+                                                                    xmlContent={part.content} 
+                                                                    onAddToWorkspace={handleAddToWorkspace}
+                                                                    onReplaceWorkspace={handleReplaceWorkspace}
+                                                                />
+                                                            )
+                                                        ))}
                                                     </>
                                                 ) : (
                                                     <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(msg.text) }} />

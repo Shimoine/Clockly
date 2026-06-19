@@ -10,6 +10,9 @@ import PageOfMakeRule from './PageOfMakeRule.js';
 import PageOfEditRule from './PageOfEditRule.js';
 import PageOfRuleList from './PageOfRuleList';
 import PageOfSettings from './PageOfSettings.js';
+import PageOfXmlTest from './PageofXmlTest.js';
+import PageOfJsonTest from './PageofJsonTest.js';
+import PageOfTokenTest from './PageOfTokenTest.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -25,6 +28,9 @@ ReactDOM.render(
           <Route path="/calendar" element={<PageOfCalendar />}/>
           <Route path="/list" element={<PageOfRuleList />}/>
           <Route path="/settings" element={<PageOfSettings />}/>
+          {/* <Route path="/xml-test" element={<PageOfXmlTest />} /> */}
+          {/* <Route path="/json-test" element={<PageOfJsonTest />} /> */}
+          {/* <Route path="/token-test" element={<PageOfTokenTest />} /> */}
         </Routes>
       </div>
     </Router>

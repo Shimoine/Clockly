@@ -400,7 +400,7 @@ post '/gemini-completion' do
         end
         
         # Gemini API URL
-        uri = URI("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=#{gemini_api_key}")
+        uri = URI("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=#{gemini_api_key}")
         
         # リクエストボディ
         request_body = {
@@ -537,6 +537,7 @@ post '/gemini-ask' do
 - 質問者の現在のワークスペースは以下の通りです．
 #{current_workspace}
 
+- 
 
 ### 出力形式 (重要・厳守)
 - 回答は Blockly XML と解説文に分けて出力してください．
@@ -588,7 +589,212 @@ post '/gemini-ask' do
     puts system_instruction[:parts][0][:text]
 
     # ストリーミング用のURI
-    uri = URI("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:streamGenerateContent?alt=sse&key=#{api_key}")
+    uri = URI("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=#{api_key}")
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.open_timeout = 60
+    http.read_timeout = 3600
+
+    req = Net::HTTP::Post.new(uri.request_uri)
+    req["Content-Type"] = "application/json"
+    req["Accept"] = "text/event-stream"
+    req["Connection"] = "keep-alive"
+    
+    request_body = {
+        generationConfig: {
+            maxOutputTokens: 8192,
+            temperature: 0.7
+        }
+    }
+    
+    # 会話履歴全体を送信
+    contents = []
+    chat_history.each do |msg|
+        role = msg["role"] == "user" ? "user" : "model"
+        contents << {
+            role: role,
+            parts: [{ text: msg["text"] }]
+        }
+    end
+    # 現在のユーザーメッセージを追加
+    contents << {
+        role: "user",
+        parts: [{ text: prompt }]
+    }
+    request_body[:contents] = contents
+    request_body[:system_instruction] = system_instruction
+
+    req.body = request_body.to_json
+
+    content_type 'text/event-stream'
+    headers 'Cache-Control' => 'no-cache', 'Connection' => 'keep-alive', 'X-Accel-Buffering' => 'no'
+
+    # アシスタントの回答を蓄積する変数
+    assistant_response = ""
+
+    stream(:keep_open) do |out|
+        buffer = ""
+
+        begin
+            http.request(req) do |resp|
+                resp.read_body do |chunk|
+                    chunk.each_line do |line|
+                        line.chomp!
+                        next if line.strip.empty?
+
+                        payload = line.start_with?("data: ") ? line.sub(/^data: /, '') : line
+
+                        if payload.strip == "[DONE]"
+                            out << "data: [DONE]\n\n"
+                            out.flush if out.respond_to?(:flush)
+                            next
+                        end
+
+                        parsed = nil
+                        begin
+                            parsed = JSON.parse(payload)
+                        rescue JSON::ParserError
+                            buffer << payload
+                            begin
+                                parsed = JSON.parse(buffer)
+                                buffer = ""
+                            rescue JSON::ParserError
+                                parsed = nil
+                            end
+                        end
+
+                        if parsed
+                            items = parsed.is_a?(Array) ? parsed : [parsed]
+                            items.each do |obj|
+                                content_parts = obj.dig('candidates',0,'content','parts') || []
+                                text_full = content_parts.map{|p| p['text'].to_s}.join
+                                next if text_full.to_s.strip.empty?
+                                text_full = remove_code_blocks(text_full)
+                                assistant_response += text_full
+                                out << "data: #{text_full.to_json}\n\n"
+                                out.flush if out.respond_to?(:flush)
+                            end
+                        end
+                    end
+                end
+            end
+
+            out << "data: [DONE]\n\n"
+            out.flush if out.respond_to?(:flush)
+            
+            # ストリーミング終了後、会話履歴を更新して保存
+            chat_history << { "role" => "user", "text" => prompt }
+            chat_history << { "role" => "assistant", "text" => assistant_response }
+            save_chat_history(session_id, chat_history)
+        rescue => e
+            out << "data: {\"error\": \"#{e.message}\"}\n\n"
+            out.flush if out.respond_to?(:flush)
+        ensure
+            out.close
+        end
+    end
+end
+
+
+post '/gemini-ask-json' do
+    request.body.rewind
+    body = JSON.parse(request.body.read)
+    prompt = body["userMessage"] or halt 400, "missing prompt"
+    current_workspace = body["currentWorkspace"] || ""
+    rule_name = body["ruleName"] || ""
+    json_example = body["jsonExample"] || ""
+    available_calendars = body['availableCalendars'] || []
+    session_id = body["sessionId"] || "default"
+
+    api_key = ENV['GEMINI_API_KEY'] or halt 500, "GEMINI_API_KEY not set"
+
+    # ファイルから会話履歴を読み込む
+    chat_history = load_chat_history(session_id)
+
+    system_instruction = {
+        role: "system",
+        parts: [
+            {
+                text: <<~INSTRUCTION
+                あなたは Blockly を用いたシステム (Clockly) のプログラミングアシスタントです．以下のルールに"必ず"従って，送られてくる質問に答えてください．
+                ### 基本ルール
+                - 回答は JSON 形式で Blockly のブロック構造を表現してください．
+                - カレンダーブロックは必ず次の正確な形式を使ってください（例）：
+                {
+                  "type": "calendar",
+                  "fields": {
+                    "summary": "マイカレンダ",
+                    "id": "nomura.laboratory@gmail.com"
+                  }
+                }
+
+                - カレンダーブロックで使用する summary と id の値は、必ず利用可能なカレンダー一覧にあるものを使ってください。存在しないカレンダー名や ID を勝手に生成しないこと
+                - 利用可能なブロックは「利用可能な JSON 一覧」に記載されているもののみです．
+                - 出力は出力形式に"必ず"従って出力してください．
+                - 質問者の作成しようとしているプログラム名は「#{rule_name}」です．
+                - 質問者の現在のワークスペースは以下の通りです．
+                #{current_workspace}
+
+
+                ### 出力形式 (重要・厳守)
+                - 回答は JSON と解説文に分けて出力してください．
+                - JSON は { で始まり } で終わる形式にしてください．
+                - **絶対に JSON を ```json、```、`` などのマークダウン記法で囲まないでください！**
+                - **JSON はそのまま生のテキストとして、マークダウン記法なしで出力してください！**
+                - **コードブロック（```）は一切使用しないでください！**
+                - 解説文は JSON の後に改行を2つ挟んで出力してください．
+
+                【正しい出力例】
+
+                ここに会話文が入ります．
+
+                {
+                  "blocks": {
+                    "blocks": [
+                      {
+                        "type": "calendar",
+                        "fields": {
+                          "summary": "マイカレンダ",
+                          "id": "calendar@gmail.com"
+                        }
+                      }
+                    ]
+                  }
+                }
+
+                ここに解説文が入ります．
+
+                【間違った出力例（絶対にこうしないこと）】
+
+                ```json
+                {
+                  "blocks": { ... }
+                }
+                ```
+
+
+                - 解説文が不要な場合は，JSON のみを出力してください．
+                - JSON が不要な場合は，テキストのみを出力してください．
+
+                - 以下に示すJSON以外のブロックは絶対に生成しないでください．
+                ### 利用可能な JSON 一覧
+                #{json_example}
+                ###
+
+                ### 利用可能なカレンダー一覧
+                #{available_calendars.map{|c| "- #{c['summary']} (id: #{c['id']})"}.join("\n")}
+                ###
+                INSTRUCTION
+            }
+        ]
+    }
+
+    puts "System Instruction (JSON):\n"
+    puts system_instruction[:parts][0][:text]
+
+    # ストリーミング用のURI
+    uri = URI("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=#{api_key}")
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -747,6 +953,69 @@ delete '/chat-history/:session_id' do
     rescue => e
         status 500
         { error: "削除に失敗しました: #{e.message}" }.to_json
+    end
+end
+
+post '/gemini-count-tokens' do
+    content_type :json
+    
+    begin
+        request.body.rewind
+        data = JSON.parse(request.body.read)
+        text = data['text'] or halt 400, { error: 'Text is required' }.to_json
+        
+        api_key = ENV['GEMINI_API_KEY'] or halt 500, { error: 'GEMINI_API_KEY not set' }.to_json
+        
+        uri = URI("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:countTokens?key=#{api_key}")
+        
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        http.open_timeout = 30
+        http.read_timeout = 30
+        
+        request_obj = Net::HTTP::Post.new(uri)
+        request_obj['Content-Type'] = 'application/json'
+        
+        # 正しいリクエストボディ形式
+        request_body = {
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        {
+                            text: text
+                        }
+                    ]
+                }
+            ]
+        }
+        
+        request_obj.body = request_body.to_json
+        
+        puts "Counting tokens for text length: #{text.length}"
+        puts "Request body: #{request_obj.body}"
+        
+        response = http.request(request_obj)
+        
+        puts "Response code: #{response.code}"
+        puts "Response body: #{response.body}"
+        
+        if response.code == '200'
+            result = JSON.parse(response.body)
+            token_count = result['usageMetadata']&.dig('inputTokenCount') || result['totalTokens'] || 0
+            return { totalTokens: token_count }.to_json
+        else
+            puts "Gemini API Error: #{response.code} - #{response.body}"
+            halt 500, { error: "API request failed: #{response.code}", details: response.body }.to_json
+        end
+        
+    rescue JSON::ParserError => e
+        puts "JSON Parse Error: #{e.message}"
+        halt 400, { error: 'Invalid JSON', details: e.message }.to_json
+    rescue => e
+        puts "Error: #{e.message}"
+        puts e.backtrace
+        halt 500, { error: e.message }.to_json
     end
 end
 

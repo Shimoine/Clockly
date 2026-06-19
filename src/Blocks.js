@@ -533,17 +533,32 @@ Blockly.Blocks['hide'] = {
 //     }
 // };
 
-Blockly.Blocks['move'] = {
+Blockly.Blocks['move_date'] = {
     init: function() {
         this.appendValueInput("date")
             .setCheck(["year", "month", "date", "day"])
         this.appendDummyInput()
-            .appendField("に日時を移す");
+            .appendField("に日付を移す");
         this.setInputsInline(true);
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
         this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 年, 月, 日, 曜日\n説明: 取得した予定の日時を指定した日付へ移動（変更）します。");
+        this.setHelpUrl("");
+    }
+};
+
+Blockly.Blocks['move_time'] = {
+    init: function() {
+        this.appendValueInput("time")
+            .setCheck("time")
+        this.appendDummyInput()
+            .appendField("に時刻を移す");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, "map");
+        this.setNextStatement(true, "map");
+        this.setColour(240);
+        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 時間\n説明: 取得した予定の時刻を指定した時刻へ移動（変更）します。");
         this.setHelpUrl("");
     }
 };
@@ -630,7 +645,7 @@ Blockly.Blocks['match'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: \n説明: 指定したプロパティに指定テキストが含まれるかを判定します（部分一致）。");
+        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: \n説明: 指定したプロパティ(予定名，場所，説明)に指定テキストが含まれるかを判定します（部分一致）。");
         this.setHelpUrl("");
     }
 };
@@ -654,7 +669,7 @@ Blockly.Blocks['date_match'] = {
     init: function() {
         this.appendValueInput("dates")
             .setCheck(["year", "month", "week", "date", "day"])
-            .appendField(new Blockly.FieldDropdown([["開始日","start"], ["予定の終了日","end"]]), "property")
+            .appendField(new Blockly.FieldDropdown([["開始日","start"], ["終了日","end"]]), "property")
             .appendField("が");
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown([["である","=="], ["含む以降",">="], ["含む以前","<="]]), "operator")
@@ -1188,9 +1203,15 @@ javascriptGenerator.forBlock['hide_test'] = function(block) {
     return code;
 };
 
-javascriptGenerator.forBlock['move'] = function(block) {
+javascriptGenerator.forBlock['move_date'] = function(block) {
     var date = javascriptGenerator.valueToCode(block, 'date', javascriptGenerator.ORDER_ATOMIC);
     var code = 'move(e.start.date, normalize_date("' + date + '"));'
+    return code;
+};
+
+javascriptGenerator.forBlock['move_time'] = function(block) {
+    var time = javascriptGenerator.valueToCode(block, 'time', javascriptGenerator.ORDER_ATOMIC);
+    var code = 'move(e.start.time, ' + time + ');'
     return code;
 };
 
@@ -1496,9 +1517,15 @@ pythonGenerator.forBlock['hide_test'] = function(block) {
     return code;
 };
 
-pythonGenerator.forBlock['move'] = function(block) {
+pythonGenerator.forBlock['move_date'] = function(block) {
     var date = pythonGenerator.valueToCode(block, 'date', pythonGenerator.ORDER_ATOMIC);
     var code = 'move(e.start.date, ' + date + ')'
+    return code;
+};
+
+pythonGenerator.forBlock['move_time'] = function(block) {
+    var time = pythonGenerator.valueToCode(block, 'time', pythonGenerator.ORDER_ATOMIC);
+    var code = 'move(e.start.time, ' + time + ')'
     return code;
 };
 

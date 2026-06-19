@@ -185,10 +185,17 @@ function UseBlockly(props) {
                     <field name="text">ここに入力</field>
                 </block>
                 <block type="hide"></block>
-                <block type="move">
+                <block type="move_date">
                     <value name="date">
                         <shadow type="dummy_value" colour="230">
                             <field name="text">日付</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="move_time">
+                    <value name="time">
+                        <shadow type="dummy_value" colour="230">
+                            <field name="text">時刻</field>
                         </shadow>
                     </value>
                 </block>
@@ -241,6 +248,311 @@ function UseBlockly(props) {
             </category>
         </xml>
     `;
+
+    // ToolboxをJSON形式で定義
+    const toolboxConfig = {
+        kind: "categoryToolbox",
+        contents: [
+            {
+                kind: "category",
+                name: "カレンダ",
+                colour: "300",
+                custom: "CALENDAR_VARIABLE"
+            },
+            {
+                kind: "category",
+                name: "カレンダ操作",
+                colour: "210",
+                contents: [
+                    {
+                        kind: "block",
+                        type: "get_events",
+                        inputs: {
+                            calendar: {
+                                shadow: {
+                                    type: "dummy_value",
+                                    fields: { text: "カレンダ" }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "insert_event",
+                        inputs: {
+                            event: {
+                                shadow: {
+                                    type: "dummy_value",
+                                    fields: { text: "予定" }
+                                }
+                            },
+                            calendar: {
+                                shadow: {
+                                    type: "dummy_value",
+                                    fields: { text: "カレンダ" }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "insert_event2",
+                        inputs: {
+                            calendar: {
+                                shadow: {
+                                    type: "dummy_value",
+                                    fields: { text: "カレンダ" }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "delete_event",
+                        inputs: {
+                            event: {
+                                shadow: {
+                                    type: "dummy_value",
+                                    fields: { text: "予定" }
+                                }
+                            },
+                            calendar: {
+                                shadow: {
+                                    type: "dummy_value",
+                                    fields: { text: "カレンダ" }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                kind: "category",
+                name: "抽出",
+                colour: "180",
+                contents: [
+                    { kind: "label", text: "抽出", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "filter",
+                        inputs: {
+                            events: {
+                                shadow: { type: "dummy_value", fields: { text: "予定" } }
+                            },
+                            condition: {
+                                shadow: { type: "dummy_value", fields: { text: "条件" } }
+                            }
+                        }
+                    },
+                    { kind: "label", text: "絞り込み", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "if",
+                        inputs: {
+                            condition: {
+                                shadow: { type: "dummy_value", fields: { text: "条件" } }
+                            },
+                            statement: {
+                                shadow: { type: "dummy_statement", fields: { text: "処理" } }
+                            }
+                        }
+                    },
+                    { kind: "label", text: "条件", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "match",
+                        fields: {
+                            property: "summary",
+                            text: "ここに入力"
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "date_match",
+                        inputs: {
+                            dates: {
+                                shadow: { type: "dummy_value", fields: { text: "日付" } }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "time_match",
+                        inputs: {
+                            time: {
+                                shadow: { type: "dummy_value", fields: { text: "時刻" } }
+                            }
+                        }
+                    },
+                    { kind: "label", text: "結合", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "and",
+                        inputs: {
+                            value1: {
+                                shadow: { type: "dummy_value", fields: { text: "条件1" } }
+                            },
+                            value2: {
+                                shadow: { type: "dummy_value", fields: { text: "条件2" } }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "or",
+                        inputs: {
+                            value1: {
+                                shadow: { type: "dummy_value", fields: { text: "条件1" } }
+                            },
+                            value2: {
+                                shadow: { type: "dummy_value", fields: { text: "条件2" } }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                kind: "category",
+                name: "加工",
+                colour: "240",
+                contents: [
+                    { kind: "label", text: "写像", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "map_test",
+                        inputs: {
+                            calendar1: {
+                                shadow: { type: "dummy_value", fields: { text: "カレンダ" } }
+                            },
+                            statement: {
+                                shadow: { type: "dummy_statement", fields: { text: "加工処理" } }
+                            },
+                            calendar2: {
+                                shadow: { type: "dummy_value", fields: { text: "カレンダ" } }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "map_test2",
+                        inputs: {
+                            calendar1: {
+                                shadow: { type: "dummy_value", fields: { text: "カレンダ" } }
+                            },
+                            boolean: {
+                                shadow: { type: "dummy_value", fields: { text: "条件" } }
+                            },
+                            statement: {
+                                shadow: { type: "dummy_statement", fields: { text: "加工処理" } }
+                            },
+                            calendar2: {
+                                shadow: { type: "dummy_value", fields: { text: "カレンダ" } }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "map_test2"
+                    },
+                    { kind: "label", text: "加工", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "replace_name",
+                        fields: {
+                            property: "summary",
+                            text: "ここに入力"
+                        }
+                    },
+                    { kind: "block", type: "hide" },
+                    {
+                        kind: "block",
+                        type: "move_date",
+                        inputs: {
+                            date: {
+                                shadow: { type: "dummy_value", fields: { text: "日付" } }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "move_time",
+                        inputs: {
+                            time: {
+                                shadow: { type: "dummy_value", fields: { text: "時刻" } }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                kind: "category",
+                name: "日付",
+                colour: "120",
+                contents: [
+                    { kind: "label", text: "日付", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "year",
+                        inputs: {
+                            month: {
+                                block: {
+                                    type: "month",
+                                    inputs: {
+                                        date: {
+                                            block: { type: "date" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    { kind: "block", type: "specified_year" },
+                    { kind: "block", type: "specified_month" },
+                    { kind: "block", type: "specified_week" },
+                    { kind: "block", type: "specified_date" },
+                    { kind: "block", type: "day" },
+                    { kind: "label", text: "時刻", "web-class": "myLabelStyle" },
+                    { kind: "block", type: "time" }
+                ]
+            },
+            {
+                kind: "category",
+                name: "集計/表示",
+                colour: "60",
+                contents: [
+                    { kind: "label", text: "集計", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "total_hours",
+                        inputs: {
+                            events: {
+                                shadow: { type: "dummy_value", fields: { text: "予定" } }
+                            }
+                        }
+                    },
+                    {
+                        kind: "block",
+                        type: "total_events",
+                        inputs: {
+                            events: {
+                                shadow: { type: "dummy_value", fields: { text: "予定" } }
+                            }
+                        }
+                    },
+                    { kind: "label", text: "表示", "web-class": "myLabelStyle" },
+                    {
+                        kind: "block",
+                        type: "print",
+                        inputs: {
+                            value: {
+                                shadow: { type: "dummy_value", fields: { text: "データ" } }
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    };
     
     const xmlParser = new DOMParser();
     const xmlDom = xmlParser.parseFromString(xml, "text/xml");
@@ -446,7 +758,8 @@ function UseBlockly(props) {
 
     useEffect(() => {
         var workspace = Blockly.inject("blocklyDiv", {
-            toolbox: xmlDom.getElementById("toolbox")
+            // toolbox: xmlDom.getElementById("toolbox")
+            toolbox: toolboxConfig  // JSON形式のtoolboxを直接使用
         });
         props.setWorkspace(workspace);
         if (props.blockXml!=null){
@@ -461,20 +774,50 @@ function UseBlockly(props) {
     return (
         <div style={{ position: "relative", height: props.h, width: props.w }}>
             <div id="blocklyDiv" style={{ height: "100%", width: "100%" }}></div>
-            <Button
-                variant="outline-success"
-                disabled={isAIGenerating}
-                style={{ 
-                    position: "absolute", 
-                    top: "10px", 
-                    right: "10px", 
-                    zIndex: 1000,
-                    marginRight: '10px'
-                }}
-                onClick={handleAICompletion}
-            >
-                {isAIGenerating ? "AI生成中..." : "AI補完"}
-            </Button>
+            <div style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                zIndex: 1000,
+                display: "flex",
+                gap: "10px"
+            }}>
+                <Button
+                    variant="link"
+                    disabled={!props.workspace}
+                    onClick={() => props.workspace && props.workspace.undo(false)}
+                    title="元に戻す"
+                    style={{
+                        fontSize: "32px",
+                        padding: "0 10px",
+                        color: props.workspace ? "#6c757d" : "#ccc",
+                        textDecoration: "none"
+                    }}
+                >
+                    ↶
+                </Button>
+                <Button
+                    variant="link"
+                    disabled={!props.workspace}
+                    onClick={() => props.workspace && props.workspace.undo(true)}
+                    title="やり直す"
+                    style={{
+                        fontSize: "32px",
+                        padding: "0 10px",
+                        color: props.workspace ? "#6c757d" : "#ccc",
+                        textDecoration: "none"
+                    }}
+                >
+                    ↷
+                </Button>
+                <Button
+                    variant="outline-success"
+                    disabled={isAIGenerating}
+                    onClick={handleAICompletion}
+                >
+                    {isAIGenerating ? "AI生成中..." : "AI補完"}
+                </Button>
+            </div>
 
             {/* AI補完プレビューモーダル */}
             <Modal show={showPreviewModal} onHide={cancelChanges} size="xl">

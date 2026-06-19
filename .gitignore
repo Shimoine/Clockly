@@ -30,3 +30,15 @@ db/
 token_store.yml
 settings.yml
 test_start.sh
+
+src/PageOfJsonTest.js
+src/PageOfXmlTest.js
+src/PageOfTokenTest.js
+
+src/ChatSidebarForJson.js
+src/AllBlocksJson.js
+src/AllBlocksJsonWithoutTooltip.js
+
+src/AllBlocksXmlWithDTDWithoutTooltip.js
+src/AllBlocksXmlWithoutDTDWithoutTooltip.js
+src/AllblockXmlWithDTDWithTooltip.js

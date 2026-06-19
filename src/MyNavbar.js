@@ -13,6 +13,9 @@ function MyNavbar() {
             <Nav.Link href="/list">list</Nav.Link>
             <Nav.Link href="/make">make rule</Nav.Link>
             <Nav.Link href="/settings">settings</Nav.Link>
+            {/* <Nav.Link href="/xml-test">XML Test</Nav.Link> */}
+            {/* <Nav.Link href="/json-test">JSON Test</Nav.Link> */}
+            {/* <Nav.Link href="/token-test">Token Test</Nav.Link> */}
           </Nav>
           <div style={{ flexGrow: 1 }}></div>
           <Nav className="ml-auto">

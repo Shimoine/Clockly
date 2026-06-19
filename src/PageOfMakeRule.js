@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form'
 import UseBlockly from './UseBlockly'
 import ChatSidebar from './ChatSidebar'
+import ChatSidebarForJson from './ChatSidebarForJson'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import * as Blockly from 'blockly';
 import { javascriptGenerator } from 'blockly/javascript';
@@ -174,13 +175,123 @@ function PageOfMakeRule(props) {
 
     const handleTabSelect = (index) => {
         setSelectedTab(index);
-        handleTabSelectUtil(index, workspace, blockXml, {
-            setBlockXml,
-            setJsCode,
-            setRbCode,
-            setCurrentXmlText,
-            setJsonCode
-        });
+        
+        if (index === 3 && workspace) { // XMLタブが選択された場合
+            const xml = Blockly.Xml.workspaceToDom(workspace);
+            // IDと座標を削除
+            removeIdsAndPositions(xml);
+            // 整形してテキストに変換
+            const formattedXml = formatXml(Blockly.Xml.domToText(xml));
+            setCurrentXmlText(formattedXml);
+        } else if (index === 4 && workspace) { // JSONタブが選択された場合
+            const json = Blockly.serialization.workspaces.save(workspace);
+            // IDと座標を削除
+            removeIdsAndPositionsFromJson(json);
+            // 整形してテキストに変換
+            const formattedJson = JSON.stringify(json, null, 2);
+            setJsonCode(formattedJson);
+        } else {
+            handleTabSelectUtil(index, workspace, blockXml, {
+                setBlockXml,
+                setJsCode,
+                setRbCode,
+                setCurrentXmlText,
+                setJsonCode
+            });
+        }
+    };
+
+    // XMLからIDと座標を削除する関数
+    const removeIdsAndPositions = (xmlElement) => {
+        if (xmlElement.nodeType === 1) { // 要素ノードの場合
+            // id, x, y属性を削除
+            xmlElement.removeAttribute('id');
+            xmlElement.removeAttribute('x');
+            xmlElement.removeAttribute('y');
+            
+            // 子要素を再帰的に処理
+            for (let child of xmlElement.children) {
+                removeIdsAndPositions(child);
+            }
+        }
+    };
+
+    // JSONからIDと座標を削除する関数
+    const removeIdsAndPositionsFromJson = (jsonObj) => {
+        if (typeof jsonObj === 'object' && jsonObj !== null) {
+            // id, x, y, variables, languageVersion プロパティを削除
+            delete jsonObj.id;
+            delete jsonObj.x;
+            delete jsonObj.y;
+            delete jsonObj.variables;
+            delete jsonObj.languageVersion;
+            
+            // 配列の場合
+            if (Array.isArray(jsonObj)) {
+                jsonObj.forEach(item => {
+                    removeIdsAndPositionsFromJson(item);
+                });
+            } else {
+                // オブジェクトの全プロパティを再帰的に処理
+                Object.keys(jsonObj).forEach(key => {
+                    if (typeof jsonObj[key] === 'object') {
+                        removeIdsAndPositionsFromJson(jsonObj[key]);
+                    }
+                });
+            }
+        }
+    };
+
+    // XMLを整形する関数
+    const formatXml = (xmlString) => {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+        return formatNode(xmlDoc.documentElement, 0);
+    };
+
+    const formatNode = (node, level) => {
+        const indent = '  '.repeat(level);
+        let result = '';
+
+        if (node.nodeType === 3) { // テキストノード
+            const text = node.textContent.trim();
+            return text ? text : '';
+        }
+
+        if (node.nodeType === 1) { // 要素ノード
+            result += indent + '<' + node.nodeName;
+            
+            // 属性を追加
+            for (let attr of node.attributes) {
+                result += ` ${attr.name}="${attr.value}"`;
+            }
+            
+            if (node.childNodes.length === 0) {
+                result += '/>\n';
+            } else {
+                // fieldやshadowなどのインライン要素かチェック
+                const isInlineElement = node.nodeName === 'field' || node.nodeName === 'shadow';
+                const hasOnlyTextChild = node.childNodes.length === 1 && node.childNodes[0].nodeType === 3;
+                
+                if (isInlineElement && hasOnlyTextChild) {
+                    // テキストのみを含むfield要素はインラインで出力
+                    result += '>' + node.textContent + '</' + node.nodeName + '>\n';
+                } else {
+                    result += '>\n';
+                    
+                    for (let child of node.childNodes) {
+                        const childText = formatNode(child, level + 1);
+                        if (childText) {
+                            result += childText;
+                        }
+                    }
+                    
+                    result += indent + '</' + node.nodeName + '>\n';
+                }
+            }
+        }
+
+        return result;
     };
 
     useEffect(() => {
@@ -216,10 +327,10 @@ function PageOfMakeRule(props) {
                             <pre><code>{rbCode}</code></pre>
                         </TabPanel>
                         <TabPanel>
-                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}><code>{currentXmlText}</code></pre>
+                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', paddingLeft: '5px' }}><code>{currentXmlText}</code></pre>
                         </TabPanel>
                         <TabPanel>
-                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}><code>{jsonCode}</code></pre>
+                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', paddingLeft: '5px' }}><code>{jsonCode}</code></pre>
                         </TabPanel>
                         <TabPanel>
                             <pre>
