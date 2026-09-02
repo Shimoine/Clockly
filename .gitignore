@@ -1,44 +1,27 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
+node_modules
+dist
+dist-ssr
+*.local
 
-.env
-setting.yml
-/vendor
-db/
-token_store.yml
-settings.yml
-test_start.sh
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-src/PageOfJsonTest.js
-src/PageOfXmlTest.js
-src/PageOfTokenTest.js
-
-src/ChatSidebarForJson.js
-src/AllBlocksJson.js
-src/AllBlocksJsonWithoutTooltip.js
-
-src/AllBlocksXmlWithDTDWithoutTooltip.js
-src/AllBlocksXmlWithoutDTDWithoutTooltip.js
-src/AllblockXmlWithDTDWithTooltip.js
+server/.env
+server/token_store.json

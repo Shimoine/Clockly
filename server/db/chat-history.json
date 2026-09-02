@@ -1,0 +1,92 @@
+{
+  "session_1782263240936_2zqd5fdkh": [
+    {
+      "role": "user",
+      "text": "nomlabの今月の予定数を集計するブロックを組んで"
+    },
+    {
+      "role": "assistant",
+      "text": "\n<xml xmlns=\"https://developers.google.com/blockly/xml\">\n  <block type=\"print\" x=\"70\" y=\"70\">\n    <value name=\"value\">\n      <block type=\"total_events\">\n        <value name=\"events\">\n          <block type=\"filter\">\n            <value name=\"events\">\n              <block type=\"get_events\">\n                <value name=\"calendar\">\n                  <block type=\"calendar\">\n                    <field name=\"summary\">nomlab</field>\n                    <field name=\"id\">nomura.laboratory@gmail.com</field>\n                  </block>\n                </value>\n              </block>\n            </value>\n            <value name=\"condition\">\n              <block type=\"date_match\">\n                <field name=\"property\">start</field>\n                <field name=\"operator\">==</field>\n                <value name=\"dates\">\n                  <block type=\"specified_month\">\n                    <field name=\"month\">this_month</field>\n                  </block>\n                </value>\n              </block>\n            </value>\n          </block>\n        </value>\n      </block>\n    </value>\n  </block>\n</xml>\n"
+    }
+  ],
+  "session_1786080957500_0uqpww36a": [
+    {
+      "role": "user",
+      "text": "nomlab の今月の打合せの予定を表示するブロックを組んで"
+    },
+    {
+      "role": "assistant",
+      "text": "\n<xml xmlns=\"https://developers.google.com/blockly/xml\">\n  <block type=\"print\">\n    <value name=\"value\">\n      <block type=\"filter\">\n        <value name=\"events\">\n          <block type=\"get_events\">\n            <value name=\"calendar\">\n              <block type=\"calendar\">\n                <field name=\"summary\">nomlab</field>\n                <field name=\"id\">nomura.laboratory@gmail.com</field>\n              </block>\n            </value>\n          </block>\n        </value>\n        <value name=\"condition\">\n          <block type=\"and\">\n            <value name=\"value1\">\n              <block type=\"date_match\">\n                <field name=\"property\">start</field>\n                <field name=\"operator\">==</field>\n                <value name=\"dates\">\n                  <block type=\"specified_month\">\n                    <field name=\"month\">this_month</field>\n                  </block>\n                </value>\n              </block>\n            </value1>\n            <value name=\"value2\">\n              <block type=\"match\">\n                <field name=\"property\">summary</field>\n                <field name=\"text\">打合せ</field>\n              </block>\n            </value2>\n          </block>\n        </value>\n      </block>\n    </value>\n  </block>\n</xml>\n"
+    }
+  ],
+  "session_1786081093155_7r7pqu301": [
+    {
+      "role": "user",
+      "text": "nomlab の今月の打合せの予定を表示するブロックを組んで"
+    },
+    {
+      "role": "assistant",
+      "text": "<xml xmlns=\"https://developers.google.com/blockly/xml\">\n  <block type=\"print\">\n    <value name=\"value\">\n      <block type=\"filter\">\n        <value name=\"events\">\n          <block type=\"filter\">\n            <value name=\"events\">\n              <block type=\"get_events\">\n                <value name=\"calendar\">\n                  <block type=\"calendar\">\n                    <field name=\"summary\">nomlab</field>\n                    <field name=\"id\">nomura.laboratory@gmail.com</field>\n                  </block>\n                </value>\n              </block>\n            </value>\n            <value name=\"condition\">\n              <block type=\"date_match\">\n                <field name=\"property\">start</field>\n                <field name=\"operator\">==</field>\n                <value name=\"dates\">\n                  <block type=\"specified_month\">\n                    <field name=\"month\">this_month</field>\n                  </block>\n                </value>\n              </block>\n            </value>\n          </block>\n        </value>\n        <value name=\"condition\">\n          <block type=\"match\">\n            <field name=\"property\">summary</field>\n            <field name=\"text\">打合せ</field>\n          </block>\n        </value>\n      </block>\n    </value>\n  </block>\n</xml>"
+    }
+  ],
+  "session_1786081500210_61845yxt4": [
+    {
+      "role": "user",
+      "text": "nomlab の今月の打合せの予定を表示するブロックを組んで"
+    },
+    {
+      "role": "assistant",
+      "text": "nomlabカレンダーから今月の「打合せ」という予定を抽出し、その結果を表示するブロックを作成します。\n\n\n<xml xmlns=\"https://developers.google.com/blockly/xml\">\n  <block type=\"print\" x=\"70\" y=\"70\">\n    <value name=\"value\">\n      <block type=\"filter\">\n        <value name=\"events\">\n          <block type=\"get_events\">\n            <value name=\"calendar\">\n              <block type=\"calendar\">\n                <field name=\"summary\">nomlab</field>\n                <field name=\"id\">nomura.laboratory@gmail.com</field>\n              </block>\n            </value>\n          </block>\n        </value>\n        <value name=\"condition\">\n          <block type=\"and\">\n            <value name=\"value1\">\n              <block type=\"date_match\">\n                <field name=\"property\">start</field>\n                <field name=\"operator\">==</field>\n                <value name=\"dates\">\n                  <block type=\"specified_month\">\n                    <field name=\"month\">this_month</field>\n                  </block>\n                </value>\n              </block>\n            </value>\n            <value name=\"value2\">\n              <block type=\"match\">\n                <field name=\"property\">summary</field>\n                <field name=\"text\">打合せ</field>\n              </block>\n            </value>\n          </block>\n        </value>\n      </block>\n    </value>\n  </block>\n</xml>\n"
+    }
+  ],
+  "session_1786081689039_fhtj7wavy": [
+    {
+      "role": "user",
+      "text": "nomlab の今月の打合せの予定を表示するブロックを組んで"
+    },
+    {
+      "role": "assistant",
+      "text": "nomlabカレンダーから今月の予定を取得し、表示するブロックを作成しました。\n\n\n<xml xmlns=\"https://developers.google.com/blockly/xml\">\n  <block type=\"print\" x=\"100\" y=\"100\">\n    <value name=\"value\">\n      <block type=\"filter\">\n        <value name=\"events\">\n          <block type=\"get_events\">\n            <value name=\"calendar\">\n              <block type=\"calendar\">\n                <field name=\"summary\">nomlab</field>\n                <field name=\"id\">nomura.laboratory@gmail.com</field>\n              </block>\n            </value>\n          </block>\n        </value>\n        <value name=\"condition\">\n          <block type=\"date_match\">\n            <field name=\"property\">start</field>\n            <field name=\"operator\">==</field>\n            <value name=\"dates\">\n              <block type=\"specified_month\">\n                <field name=\"month\">this_month</field>\n              </block>\n            </value>\n          </block>\n        </value>\n      </block>\n    </value>\n  </block>\n</xml>\n"
+    }
+  ],
+  "session_1786081943415_m7ste3ysq": [
+    {
+      "role": "user",
+      "text": "nomlab の今月の打合せの予定をマイカレンダに追加するブロックを組んで"
+    },
+    {
+      "role": "assistant",
+      "text": "nomlabカレンダーから今月の「打合せ」を含む予定を抽出し、マイカレンダにコピーするブロックを作成しました。\n\n\n<xml xmlns=\"https://developers.google.com/blockly/xml\">\n  <block type=\"map_test2\">\n    <value name=\"calendar1\">\n      <block type=\"calendar\">\n        <field name=\"summary\">nomlab</field>\n        <field name=\"id\">nomura.laboratory@gmail.com</field>\n      </block>\n    </value>\n    <value name=\"boolean\">\n      <block type=\"and\">\n        <value name=\"value1\">\n          <block type=\"date_match\">\n            <field name=\"property\">start</field>\n            <field name=\"operator\">==</field>\n            <value name=\"dates\">\n              <block type=\"specified_month\">\n                <field name=\"month\">this_month</field>\n              </block>\n            </value>\n          </block>\n        </value>\n        <value name=\"value2\">\n          <block type=\"match\">\n            <field name=\"property\">summary</field>\n            <field name=\"text\">打合せ</field>\n          </block>\n        </value>\n      </block>\n    </value>\n    <statement name=\"statement\">\n      <block type=\"dummy_statement\">\n        <field name=\"text\">（加工処理なし）</field>\n      </block>\n    </statement>\n    <value name=\"calendar2\">\n      <block type=\"calendar\">\n        <field name=\"summary\">マイカレンダ</field>\n        <field name=\"id\">c_04b6279f95791dce1c7f620d17833058e3482b693a30bba6fd46e146d1c7e40d</field>\n      </block>\n    </value>\n  </block>\n</xml>\n"
+    }
+  ],
+  "session_1786082201644_l6irbdhao": [
+    {
+      "role": "user",
+      "text": "nomlab の今月の予定を来月にコピーするプログラムを作りたい"
+    },
+    {
+      "role": "assistant",
+      "text": "nomlabカレンダーの今月の予定を来月にコピーするブロックを作成しました。これにより、nomlabカレンダーから今月の予定を抽出し、その日付を来月に変更して同じnomlabカレンダーに追加します。\n\n\n<block type=\"map_test2\">\n  <value name=\"calendar1\">\n    <block type=\"calendar\">\n      <field name=\"summary\">nomlab</field>\n      <field name=\"id\">nomura.laboratory@gmail.com</field>\n    </block>\n  </value>\n  <value name=\"boolean\">\n    <block type=\"date_match\">\n      <field name=\"property\">start</field>\n      <field name=\"operator\">==</field>\n      <value name=\"dates\">\n        <block type=\"specified_month\">\n          <field name=\"month\">this_month</field>\n        </block>\n      </value>\n    </block>\n  </value>\n  <value name=\"statement\">\n    <block type=\"move_date\">\n      <value name=\"date\">\n        <block type=\"specified_month\">\n          <field name=\"month\">next_month</field>\n        </block>\n      </value>\n    </block>\n  </value>\n  <value name=\"calendar2\">\n    <block type=\"calendar\">\n      <field name=\"summary\">nomlab</field>\n      <field name=\"id\">nomura.laboratory@gmail.com</field>\n    </block>\n  </value>\n</block>\n"
+    }
+  ],
+  "session_1786082629396_gofab9saa": [
+    {
+      "role": "user",
+      "text": "nomlabカレンダの今年の予定を来年にコピーするプログラムを書いて"
+    },
+    {
+      "role": "assistant",
+      "text": "<xml xmlns=\"https://developers.google.com/blockly/xml\">\n  <block type=\"map_test2\">\n    <value name=\"calendar1\">\n      <block type=\"calendar\">\n        <field name=\"summary\">nomlab</field>\n        <field name=\"id\">nomura.laboratory@gmail.com</field>\n      </block>\n    </value>\n    <value name=\"boolean\">\n      <block type=\"date_match\">\n        <field name=\"property\">start</field>\n        <field name=\"operator\">==</field>\n        <value name=\"dates\">\n          <block type=\"specified_year\">\n            <field name=\"year\">this_year</field>\n          </block>\n        </value>\n      </block>\n    </value>\n    <value name=\"statement\">\n      <block type=\"move_date\">\n        <value name=\"date\">\n          <block type=\"specified_year\">\n            <field name=\"year\">next_year</field>\n          </block>\n        </value>\n      </block>\n    </value>\n    <value name=\"calendar2\">\n      <block type=\"calendar\">\n        <field name=\"summary\">nomlab</field>\n        <field name=\"id\">nomura.laboratory@gmail.com</field>\n      </block>\n    </value>\n  </block>\n</xml>\n\nこのプログラムは、nomlabカレンダから今年の予定をすべて抽出し、それらの予定の日付を来年に移動した上で、再びnomlabカレンダにコピーする処理を実行します。"
+    }
+  ],
+  "session_1787619918796_t5ts62j3l": [
+    {
+      "role": "user",
+      "text": "「職場用カレンダ」の今月の出張と会食の予定について詳細を隠して「家庭用カレンダ」に共有するプログラムを作りたい"
+    },
+    {
+      "role": "assistant",
+      "text": "<xml xmlns=\"https://developers.google.com/blockly/xml\">\n  <block type=\"map_test2\">\n    <value name=\"calendar1\">\n      <block type=\"calendar\">\n        <field name=\"summary\">職場用カレンダ</field>\n        <field name=\"id\">c_2f37c3f17add1157b3ee9838f585ad56f5bae2465ec04563635f3f4fd5ce4701@group.calendar.google.com</field>\n      </block>\n    </value>\n    <value name=\"boolean\">\n      <block type=\"and\">\n        <value name=\"value1\">\n          <block type=\"date_match\">\n            <field name=\"property\">start</field>\n            <field name=\"operator\">==</field>\n            <value name=\"dates\">\n              <block type=\"date_obj_specified_month\">\n                <field name=\"month\">this_month</field>\n              </block>\n            </value>\n          </block>\n        </value>\n        <value name=\"value2\">\n          <block type=\"or\">\n            <value name=\"value1\">\n              <block type=\"match\">\n                <field name=\"property\">summary</field>\n                <field name=\"text\">出張</field>\n              </block>\n            </value>\n            <value name=\"value2\">\n              <block type=\"match\">\n                <field name=\"property\">summary</field>\n                <field name=\"text\">会食</field>\n              </block>\n            </value>\n          </block>\n        </value>\n      </block>\n    </value>\n    <value name=\"statement\">\n      <block type=\"replace_name\">\n        <field name=\"property\">summary</field>\n        <field name=\"text\">予定</field>\n        <next>\n          <block type=\"hide\">\n            <field name=\"property\">location</field>\n            <next>\n              <block type=\"hide\">\n                <field name=\"property\">description</field>\n              </block>\n            </next>\n          </block>\n        </next>\n      </block>\n    </value>\n    <value name=\"calendar2\">\n      <block type=\"calendar\">\n        <field name=\"summary\">家庭用カレンダ</field>\n        <field name=\"id\">c_dbbcef937b11e9fd346992c4022466e4fefed2b3aa4d5064d75c7bf56cf820ac@group.calendar.google.com</field>\n      </block>\n    </value>\n  </block>\n</xml>\n\nこのプログラムは、「職場用カレンダ」から今月の「出張」または「会食」という文字が予定名に含まれるイベントを検索します。見つかった各イベントに対して、予定名を「予定」に置き換え、場所と説明を非表示にした上で、「家庭用カレンダ」にコピーします。"
+    }
+  ]
+}

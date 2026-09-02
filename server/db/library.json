@@ -1,0 +1,14 @@
+{
+  "id": [
+    "1c110179-d6cb-4e4e-8925-0dd0a1d84134",
+    "e03406fd-163b-4476-aea0-be87164d524d"
+  ],
+  "name": [
+    "test",
+    "あ"
+  ],
+  "xml": [
+    "<block type=\"map_test2\" id=\"NklAPmzh%,h//?SdJvYU\" x=\"-370\" y=\"-77\"><value name=\"calendar1\"><shadow type=\"dummy_value\" id=\"~uzX.L|VnbMNfMD8fVSl\"><field name=\"text\">カレンダ</field></shadow></value><value name=\"boolean\"><shadow type=\"dummy_value\" id=\"=0E-*hIl_q`og;xjxHGi\"><field name=\"text\">条件</field></shadow></value><statement name=\"statement\"><shadow type=\"dummy_statement\" id=\"1m?pc6{.I3NXnPG-Ss|A\"><field name=\"text\">加工処理</field></shadow></statement><value name=\"calendar2\"><shadow type=\"dummy_value\" id=\"NiQ+WBVlgRzL(YHp5Hv]\"><field name=\"text\">カレンダ</field></shadow></value></block>",
+    "<block type=\"filter\" id=\"p{/M,:+}@L+EVyA8Kt%Q\" x=\"-621\" y=\"-266\"><value name=\"events\"><shadow type=\"dummy_value\" id=\"_vUQnP-;hCc=TxWO_3{/\"><field name=\"text\">予定</field></shadow></value><value name=\"condition\"><shadow type=\"dummy_value\" id=\"!gp~}EAsS4BieA}ZS2K:\"><field name=\"text\">条件</field></shadow></value></block>"
+  ]
+}
