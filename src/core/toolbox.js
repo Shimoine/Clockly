@@ -146,7 +146,7 @@ export const toolboxConfig = {
         { kind: "label", text: "写像", "web-class": "myLabelStyle" },
         {
           kind: "block",
-          type: "map_test",
+          type: "map",
           inputs: {
             calendar1: {
               shadow: { type: "dummy_value", fields: { text: "カレンダ" } },
@@ -161,7 +161,7 @@ export const toolboxConfig = {
         },
         {
           kind: "block",
-          type: "map_test2",
+          type: "map2",
           inputs: {
             calendar1: {
               shadow: { type: "dummy_value", fields: { text: "カレンダ" } },

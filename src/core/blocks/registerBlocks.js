@@ -231,7 +231,7 @@ Blockly.Blocks['print'] = {
 // };
 
 
-Blockly.Blocks['map_test'] = {
+Blockly.Blocks['map'] = {
     init: function() {
         this.appendValueInput("calendar1")
             .setCheck("Calendar");
@@ -252,7 +252,7 @@ Blockly.Blocks['map_test'] = {
     }
 };
 
-Blockly.Blocks['map_test2'] = {
+Blockly.Blocks['map2'] = {
     init: function() {
         this.appendValueInput("calendar1")
             .setCheck("Calendar");
@@ -535,7 +535,7 @@ Blockly.Blocks['hide'] = {
 Blockly.Blocks['move_date'] = {
     init: function() {
         this.appendValueInput("date")
-            .setCheck(["year", "month", "date", "day"])
+            .setCheck(["year", "month", "date", "day", "specified_year", "specified_month", "specified_week", "specified_date"])
         this.appendDummyInput()
             .appendField("に日付を移す");
         this.setInputsInline(true);
@@ -1279,14 +1279,14 @@ javascriptGenerator.forBlock['test_print'] = function() {
     return code;
 };
 
-javascriptGenerator.forBlock['map'] = function(block) {
-    var events = javascriptGenerator.valueToCode(block, 'events', javascriptGenerator.ORDER_ATOMIC);
-    var statement = javascriptGenerator.statementToCode(block, 'statement');
-    var code = ''+events+'.map(async function(e) {\n'+statement+'});\n';
-    return code;
-};
+// javascriptGenerator.forBlock['map'] = function(block) {
+//     var events = javascriptGenerator.valueToCode(block, 'events', javascriptGenerator.ORDER_ATOMIC);
+//     var statement = javascriptGenerator.statementToCode(block, 'statement');
+//     var code = ''+events+'.map(async function(e) {\n'+statement+'});\n';
+//     return code;
+// };
 
-javascriptGenerator.forBlock['map_test'] = function(block) {
+javascriptGenerator.forBlock['map'] = function(block) {
     var calendar1 = javascriptGenerator.valueToCode(block, 'calendar1', javascriptGenerator.ORDER_ATOMIC);
     var calendar2= javascriptGenerator.valueToCode(block, 'calendar2', javascriptGenerator.ORDER_ATOMIC);
     var statement = javascriptGenerator.statementToCode(block, 'statement');
@@ -1294,7 +1294,7 @@ javascriptGenerator.forBlock['map_test'] = function(block) {
     return code;
 };
 
-javascriptGenerator.forBlock['map_test2'] = function(block) {
+javascriptGenerator.forBlock['map2'] = function(block) {
     var calendar1 = javascriptGenerator.valueToCode(block, 'calendar1', javascriptGenerator.ORDER_ATOMIC);
     var calendar2= javascriptGenerator.valueToCode(block, 'calendar2', javascriptGenerator.ORDER_ATOMIC);
     var condition = javascriptGenerator.valueToCode(block, 'boolean', javascriptGenerator.ORDER_ATOMIC);
