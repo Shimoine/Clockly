@@ -25,3 +25,4 @@ dist-ssr
 
 server/.env
 server/token_store.json
+server/db/*
