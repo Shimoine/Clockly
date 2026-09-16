@@ -1,6 +1,15 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator } from 'blockly/javascript';
 
+function createTooltip({ type, insertableValues = "", connectableValues = "", description }) {
+    return [
+        `ブロックの型: ${type}`,
+        `挿入可能な型: ${insertableValues}`,
+        `接続可能な型: ${connectableValues}`,
+        `説明: ${description}`,
+    ].join("\n");
+}
+
 /* 現在使えるブロック
 get_events: 予定の取得
 insert_event: 予定の追加
@@ -30,7 +39,7 @@ Blockly.Blocks['dummy_value'] = {
         this.appendDummyInput()
             .appendField(new Blockly.FieldLabelSerializable(""), "text");
         this.setOutput(true, null);
-        this.setTooltip("ブロックの型: ダミー値\n入力可能なブロックの型: \n説明: 値を表すプレースホルダのダミーブロックです。デバッグや見た目の補助に使用します。");
+        this.setTooltip(createTooltip({ type: "ダミー値", insertableValues: "なし", connectableValues: "なし", description: "値を表すプレースホルダである．ツールボックス内で入力欄の例を示すために使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -41,7 +50,7 @@ Blockly.Blocks['dummy_statement'] = {
             .appendField(new Blockly.FieldLabelSerializable(""), "text");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setTooltip("ブロックの型: ダミーステートメント\n入力可能なブロックの型: \n説明: ステートメント用のプレースホルダブロックです。ワークフローの構成やテストに使用します。");
+        this.setTooltip(createTooltip({ type: "ダミーステートメント", insertableValues: "なし", connectableValues:"任意",description: "処理を表すプレースホルダである．ツールボックス内で処理欄の例を示すために使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -57,7 +66,7 @@ Blockly.Blocks['calendar'] = {
             .setVisible(false);
         this.setOutput(true, "Calendar");
         this.setColour(300);
-        this.setTooltip("ブロックの型: カレンダ\n入力可能なブロックの型: \n説明: このブロックはカレンダのID（summaryと内部ID）を表します。カレンダを参照する入力として使用します。");
+        this.setTooltip(createTooltip({ type: "カレンダ", insertableValues: "なし", connectableValues: "なし", description: "カレンダ名と内部 ID を表す．カレンダを指定する入力欄に接続して使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -72,7 +81,7 @@ Blockly.Blocks['get_events'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Event");
         this.setColour(0);
-        this.setTooltip("ブロックの型: 予定\n入力可能なブロックの型: カレンダ\n説明: 接続したカレンダから予定一覧を取得して返します。返される予定はコピーであり、加工しても元データは変わりません。");
+        this.setTooltip(createTooltip({ type: "予定", insertableValues: "カレンダ", connectableValues: "なし", description: "指定したカレンダから予定一覧の複製を取得する．取得した予定を加工しても，元の予定は変更されない．" }));
         this.setHelpUrl("");
     }
 };
@@ -90,7 +99,7 @@ Blockly.Blocks['insert_event1'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(210);
-        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定（Event）を指定したカレンダ（Calendar）に追加します。");
+        this.setTooltip(createTooltip({ type: "カレンダ操作", insertableValues: "予定，カレンダ", connectableValues: "任意", description: "指定した予定を指定したカレンダに追加する．" }));
         this.setHelpUrl("");
     }
 };
@@ -105,7 +114,7 @@ Blockly.Blocks['insert_event2'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(210);
-        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: カレンダ\n説明: 指定したカレンダに予定データを追加します（イベント情報を別途接続して使用）。");
+        this.setTooltip(createTooltip({ type: "カレンダ操作", insertableValues: "カレンダ", connectableValues: "任意", description: "指定したカレンダに予定を追加するための処理ブロックである．" }));
         this.setHelpUrl("");
     }
 };
@@ -137,7 +146,7 @@ Blockly.Blocks['insert_event'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(210);
-        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定（Event）を指定したカレンダ（Calendar）に追加します。");
+        this.setTooltip(createTooltip({ type: "カレンダ操作", insertableValues: "予定，カレンダ", connectableValues: "任意", description: "指定した予定を指定したカレンダに追加する．" }));
         this.setHelpUrl("");
     }
 };
@@ -174,7 +183,7 @@ Blockly.Blocks['delete_event'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(210);
-        this.setTooltip("ブロックの型: カレンダ操作\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定（Event）を指定したカレンダから削除します。" );
+        this.setTooltip(createTooltip({ type: "カレンダ操作", insertableValues: "予定，カレンダ", connectableValues: "任意", description: "指定した予定を指定したカレンダから削除する．" }));
         this.setHelpUrl("");
     },
 };
@@ -189,7 +198,7 @@ Blockly.Blocks['print'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(160);
-        this.setTooltip("ブロックの型: 表示\n入力可能なブロックの型: 任意\n説明: 指定した値を表示します（デバッグやユーザーへの情報提示に使用）。");
+        this.setTooltip(createTooltip({ type: "表示", insertableValues: "任意", connectableValues: "任意", description: "指定した値を表示する．デバッグや実行結果の確認に使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -247,7 +256,7 @@ Blockly.Blocks['map'] = {
         this.appendDummyInput()
             .appendField("に追加");
         this.setColour(30);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: カレンダ\n説明: カレンダ1の予定を複製して各予定に加工処理を適用し、結果をカレンダ2に追加します。");
+        this.setTooltip(createTooltip({ type: "予定の加工", insertableValues: "カレンダ，加工処理", connectableValues: "なし", description: "カレンダ 1 の予定を複製し，各予定に加工処理を適用してカレンダ 2 に追加する．" }));
         this.setHelpUrl("");
     }
 };
@@ -272,7 +281,7 @@ Blockly.Blocks['map2'] = {
         this.appendDummyInput()
             .appendField("に追加");
         this.setColour(30);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: カレンダ\n説明: カレンダ1の予定を条件で絞り込み、絞り込んだ各予定に加工処理を適用してカレンダ2に追加します。");
+        this.setTooltip(createTooltip({ type: "予定の加工", insertableValues: "カレンダ，条件，加工処理", connectableValues: "なし", description: "カレンダ 1 の予定を条件で絞り込み，各予定に加工処理を適用してカレンダ 2 に追加する．" }));
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
@@ -343,7 +352,7 @@ Blockly.Blocks['filter'] = {
         this.setHelpUrl("");
         this.setOutput(true, "Event");
         this.setColour(0);
-        this.setTooltip("ブロックの型: 抽出\n入力可能なブロックの型: カレンダ, 予定\n説明: 指定した条件で予定一覧を絞り込み、フィルタされた予定の配列を返します。");
+        this.setTooltip(createTooltip({ type: "予定", insertableValues: "予定，条件", connectableValues: "なし", description: "予定一覧を指定した条件で絞り込み，条件に一致する予定一覧を返す．" }));
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
                 // ブロックが移動されたときのみ処理する
@@ -393,7 +402,7 @@ Blockly.Blocks['property'] = {
         this.setInputsInline(true);
         this.setOutput(true, "property");
         this.setColour(180);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 予定\n説明: 予定（Event）の指定したプロパティ（予定名/場所/説明）を抽出して配列で返します。");
+        this.setTooltip(createTooltip({ type: "プロパティの抽出", insertableValues: "予定", connectableValues: "プロパティ値", description: "予定一覧から選択したプロパティ（予定名，場所，説明）を取り出して返す．" }));
         this.setHelpUrl("");
     }
 };
@@ -409,7 +418,7 @@ Blockly.Blocks['replace_name'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 加工\n説明: 選択したプロパティの値を指定した文字列に置き換えます（加工操作）。");
+        this.setTooltip(createTooltip({ type: "加工", insertableValues: "なし", connectableValues: "任意", description: "予定名/場所/説明の値を指定した文字列に置き換える．予定を加工する処理の中で使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -509,7 +518,7 @@ Blockly.Blocks['hide'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 加工\n説明: 指定したプロパティの表示を隠します。予定名は'予定'に置換されます。");
+        this.setTooltip(createTooltip({ type: "加工", insertableValues: "なし", connectableValues: "任意", description: "予定名/場所/説明を隠す．予定名を隠した場合は「予定」に置き換える．その他は空欄にして共有する．予定を加工する処理の中で使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -542,7 +551,7 @@ Blockly.Blocks['move_date'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 年, 月, 日, 曜日\n説明: 取得した予定の日時を指定した日付へ移動（変更）します。");
+        this.setTooltip(createTooltip({ type: "加工", insertableValues: "年，月，日，曜日",connectableValues: "任意", description: "予定の開始日時と終了日時の日付を，指定した日付へ変更する．予定を加工する処理の中で使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -557,7 +566,7 @@ Blockly.Blocks['move_time'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip("ブロックの型: 加工\n入力可能なブロックの型: 時間\n説明: 取得した予定の時刻を指定した時刻へ移動（変更）します。");
+        this.setTooltip(createTooltip({ type: "加工", insertableValues: "時刻", connectableValues: "任意",description: "予定の開始時刻と終了時刻を，指定した時刻へ変更する．予定を加工する処理の中で使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -575,7 +584,7 @@ Blockly.Blocks['if'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(180);
-        this.setTooltip("ブロックの型: 抽出\n入力可能なブロックの型: 真偽値\n説明: 条件が真の場合に内部の処理を実行する条件分岐ブロックです。");
+        this.setTooltip(createTooltip({ type: "条件分岐", insertableValues: "条件，任意の処理", connectableValues: "任意", description: "条件が真である場合に，内部の処理を実行する．" }));
         this.setHelpUrl("");
     }
 };
@@ -590,7 +599,7 @@ Blockly.Blocks['and'] = {
         this.setInputsInline(false);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 真偽値\n説明: 二つの条件を論理ANDで結合してBooleanを返します。");
+        this.setTooltip(createTooltip({ type: "条件", insertableValues: "条件", connectableValues: "なし", description: "二つの条件を論理積で結合し，真偽値を返す．" }));
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
@@ -629,7 +638,7 @@ Blockly.Blocks['or'] = {
         this.setInputsInline(false);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 真偽値\n説明: 二つの条件を論理ORで結合してBooleanを返します。");
+        this.setTooltip(createTooltip({ type: "条件", insertableValues: "条件", connectableValues: "なし", description: "二つの条件を論理和で結合し，真偽値を返す．" }));
         this.setHelpUrl("");
     }
 };
@@ -644,7 +653,7 @@ Blockly.Blocks['match'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: \n説明: 指定したプロパティ(予定名，場所，説明)に指定テキストが含まれるかを判定します（部分一致）。");
+        this.setTooltip(createTooltip({ type: "条件", insertableValues: "なし", connectableValues: "なし", description: "選択したプロパティ（予定名，場所，説明）に指定したテキストが含まれるかを部分一致で判定する．" }));
         this.setHelpUrl("");
     }
 };
@@ -678,7 +687,7 @@ Blockly.Blocks['date_match'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 年, 月, 日, 曜日, 週\n説明: 指定した日付ブロックと比較して予定の開始/終了日が条件を満たすか判定します。");
+        this.setTooltip(createTooltip({ type: "条件", insertableValues: "年，月，週，日，曜日", connectableValues: "なし", description: "予定の開始日または終了日が，指定した日付と条件を満たすか判定する．" }));
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             var inputBlock = this.getInputTargetBlock('dates');
@@ -767,7 +776,7 @@ Blockly.Blocks['time_match'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Boolean");
         this.setColour(180);
-        this.setTooltip("ブロックの型: 条件\n入力可能なブロックの型: 時刻\n説明: 指定した時刻ブロックと比較して予定の開始/終了時刻が条件を満たすか判定します。");
+        this.setTooltip(createTooltip({ type: "条件", insertableValues: "時刻", connectableValues: "真偽値", description: "予定の開始時刻または終了時刻が，指定した時刻と条件を満たすか判定する．" }));
         this.setHelpUrl("");
     }
 };
@@ -949,7 +958,7 @@ Blockly.Blocks['time_match'] = {
 //     }
 // };
 
-/* --- 実験用: オブジェクトベースの日付ブロック（旧文字列形式のテスト用） --- */
+/* 日付ブロック */
 Blockly.Blocks['year'] = {
     init: function() {
         this.appendValueInput("month")
@@ -959,7 +968,7 @@ Blockly.Blocks['year'] = {
         this.setInputsInline(false);
         this.setOutput(true, "year");
         this.setColour(120);
-        this.setTooltip("実験用: 年オブジェクトを返すブロックです。旧文字列形式ではなくオブジェクトとして扱います。");
+        this.setTooltip(createTooltip({ type: "年", insertableValues: "なし", connectableValues: "月", description: "西暦を表す．月を接続すると年月を表せる．" }));
         this.setHelpUrl("");
     }
 };
@@ -975,7 +984,7 @@ Blockly.Blocks['month'] = {
         this.setInputsInline(false);
         this.setOutput(true, "month");
         this.setColour(120);
-        this.setTooltip("実験用: 月オブジェクトを返すブロックです。");
+        this.setTooltip(createTooltip({ type: "月", insertableValues: "なし", connectableValues: "日，曜日", description: "月を表す．日または曜日を接続すると，月内の日付または曜日を表せる．" }));
         this.setHelpUrl("");
     }
 };
@@ -988,7 +997,7 @@ Blockly.Blocks['date'] = {
         this.setInputsInline(false);
         this.setOutput(true, "date");
         this.setColour(120);
-        this.setTooltip("実験用: 日オブジェクトを返すブロックです。");
+        this.setTooltip(createTooltip({ type: "日", insertableValues: "なし", connectableValues: "なし", description: "月の日付を表す．" }));
         this.setHelpUrl("");
     }
 };
@@ -1002,7 +1011,7 @@ Blockly.Blocks['day'] = {
         this.setInputsInline(false);
         this.setOutput(true, "day");
         this.setColour(120);
-        this.setTooltip("実験用: 曜日オブジェクトを返すブロックです。");
+        this.setTooltip(createTooltip({ type: "曜日",insertableValues: "なし", connectableValues: "なし", description: "曜日を表す．" }));
         this.setHelpUrl("");
     }
 };
@@ -1017,7 +1026,7 @@ Blockly.Blocks['specified_year'] = {
         this.setInputsInline(false);
         this.setOutput(true, "specified_year");
         this.setColour(120);
-        this.setTooltip("実験用: 相対年オブジェクトを返すブロックです。");
+        this.setTooltip(createTooltip({ type: "年", insertableValues: "なし", connectableValues: "月", description: "今年，来年，または去年を表す．月を接続すると年月を表せる．" }));
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             var monthConnection = this.getInputTargetBlock('month');
@@ -1049,7 +1058,7 @@ Blockly.Blocks['specified_month'] = {
         this.setInputsInline(false);
         this.setOutput(true, "specified_month");
         this.setColour(120);
-        this.setTooltip("実験用: 相対月オブジェクトを返すブロックです。");
+        this.setTooltip(createTooltip({ type: "月", insertableValues: "なし", connectableValues: "日，曜日", description: "今月，来月，または先月を表す．日または曜日を接続できる．" }));
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             var dateConnection = this.getInputTargetBlock('date');
@@ -1081,7 +1090,7 @@ Blockly.Blocks['specified_week'] = {
         this.setInputsInline(false);
         this.setOutput(true, "specified_week");
         this.setColour(120);
-        this.setTooltip("実験用: 相対週オブジェクトを返すブロックです。");
+        this.setTooltip(createTooltip({ type: "週", insertableValues: "なし", connectableValues: "曜日", description: "今週，来週，または先週を表す．曜日を接続できる．" }));
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             var dayConnection = this.getInputTargetBlock('day');
@@ -1112,7 +1121,7 @@ Blockly.Blocks['specified_date'] = {
         this.setInputsInline(false);
         this.setOutput(true, "specified_date");
         this.setColour(120);
-        this.setTooltip("実験用: 相対日オブジェクトを返すブロックです。");
+        this.setTooltip(createTooltip({ type: "日", insertableValues: "なし", connectableValues: "なし", description: "今日，明日，または昨日を表す．" }));
         this.setHelpUrl("");
     }
 };
@@ -1127,7 +1136,7 @@ Blockly.Blocks['time'] = {
         this.setInputsInline(false);
         this.setOutput(true, "time");
         this.setColour(120);
-        this.setTooltip("ブロックの型: 日付（時刻）\n入力可能なブロックの型: \n説明: 時刻（時、分）を指定するブロックです。予定の開始／終了時刻指定に使用します。");
+        this.setTooltip(createTooltip({ type: "時刻", insertableValues: "なし", connectableValues: "なし", description: "時刻（時，分）を表す．予定の開始時刻または終了時刻の条件・変更に使用する．" }));
         this.setHelpUrl("");
     }
 };
@@ -1141,7 +1150,7 @@ Blockly.Blocks['total_hours'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setColour(60);
-        this.setTooltip("ブロックの型: 集計\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定一覧の合計時間を計算して返します（時間単位）。");
+        this.setTooltip(createTooltip({ type: "集計", insertableValues: "予定", connectableValues: "なし", description: "指定した予定一覧の合計時間を時間単位で返す．" }));
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {
@@ -1173,7 +1182,7 @@ Blockly.Blocks['total_events'] = {
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setColour(60);
-        this.setTooltip("ブロックの型: 集計\n入力可能なブロックの型: 予定, カレンダ\n説明: 指定した予定一覧の件数を返します。");
+        this.setTooltip(createTooltip({ type: "集計", insertableValues: "予定", connectableValues: "なし", description: "指定した予定一覧の件数を返す．" }));
         this.setHelpUrl("");
         this.setOnChange(function(event) {
             if (event.type === Blockly.Events.BLOCK_MOVE) {

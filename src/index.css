@@ -133,6 +133,98 @@ svg[display="none"] {
   display: none;
 }
 
+/* Blockly標準のツールチップは、独自の説明カードに統一するため非表示にする。 */
+.blocklyTooltipDiv {
+  display: none !important;
+}
+
+/* Blockly の標準ツールチップを説明カードとして表示する． */
+.clockly-block-tooltip {
+  box-sizing: border-box;
+  width: min(360px, calc(100vw - 24px));
+  max-width: min(360px, calc(100vw - 24px));
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid oklch(0.88 0.015 255);
+  border-radius: 0.75rem;
+  background: oklch(0.99 0.004 255);
+  box-shadow: 0 12px 30px oklch(0.2 0.02 255 / 18%);
+  color: oklch(0.24 0.02 255);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  opacity: 1;
+  position: fixed;
+  z-index: 100000;
+  /* ツールチップがBlocklyのフィールドやドラッグ終了のイベントを
+     奪わないよう、表示専用のオーバーレイにする。 */
+  pointer-events: none;
+}
+
+.clockly-block-tooltip[hidden] {
+  display: none;
+}
+
+.clockly-block-tooltip__content {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem 1rem;
+}
+
+.clockly-block-tooltip__header {
+  display: grid;
+  gap: 0.125rem;
+  padding-left: 0.625rem;
+  border-left: 3px solid oklch(0.55 0.16 255);
+}
+
+.clockly-block-tooltip__eyebrow,
+.clockly-block-tooltip__value-label {
+  color: oklch(0.5 0.02 255);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.clockly-block-tooltip__type {
+  color: oklch(0.24 0.02 255);
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+
+.clockly-block-tooltip__description {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.clockly-block-tooltip__values {
+  display: grid;
+  gap: 0.375rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid oklch(0.9 0.012 255);
+}
+
+.clockly-block-tooltip__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.clockly-block-tooltip__chip {
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: oklch(0.94 0.025 255);
+  color: oklch(0.36 0.08 255);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.clockly-block-tooltip__chip--empty {
+  background: oklch(0.95 0.008 255);
+  color: oklch(0.5 0.015 255);
+  font-weight: 500;
+}
+
 /* -----------------------------------------------
  * Schedule-X 月グリッドの行高さを拡張するオーバーライド
  * デフォルトは内容に合わせた最小限の高さになっているため、
