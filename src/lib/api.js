@@ -103,7 +103,7 @@ export function createLibrary(library) {
 }
 
 export function deleteLibrary(id) {
-  return postJson("/delete_library", id);
+  return postJson("/delete_library", { id });
 }
 
 /* ---------------------------------------------------------------- */

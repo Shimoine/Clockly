@@ -27,7 +27,11 @@ router.post("/create_library", (req, res) => {
 });
 
 router.post("/delete_library", (req, res) => {
-  const targetId = req.body; // 元実装が body 直接をIDとして受け取っていた形式を踏襲
+  const targetId = req.body?.id;
+  if (typeof targetId !== "string" || !targetId.trim()) {
+    return res.status(400).json({ error: "削除するライブラリのIDが必要です" });
+  }
+
   const library = loadLibrary();
   const index = library.id.indexOf(targetId);
 
