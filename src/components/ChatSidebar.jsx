@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as Blockly from "blockly";
-import { Bot, History, Plus, Square, Send, X, Trash2 } from "lucide-react";
+import { Bot, CheckCircle2, History, Plus, Square, Send, X, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -113,8 +113,16 @@ export default function ChatSidebar({ workspace, ruleName }) {
   const [sessionId, setSessionId] = useState(newSessionId);
   const [sessions, setSessions] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [workspaceNotice, setWorkspaceNotice] = useState(null);
   const textareaRef = useRef(null);
   const messagesEndRef = useRef(null);
+
+  // 追加・置換の完了メッセージを、最後の操作から3秒間表示する。
+  useEffect(() => {
+    if (!workspaceNotice) return;
+    const timer = window.setTimeout(() => setWorkspaceNotice(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [workspaceNotice]);
 
   // テキストエリアの高さ自動調整
   useEffect(() => {
@@ -174,6 +182,7 @@ export default function ChatSidebar({ workspace, ruleName }) {
 
   // ワークスペースのXMLをブロックに追加する
   const handleAddToWorkspace = (xmlContent) => {
+    setWorkspaceNotice(null);
     if (!workspace) return alert("ワークスペースが初期化されていません");
     try {
       const xmlDom = Blockly.utils.xml.textToDom(xmlContent);
@@ -186,7 +195,10 @@ export default function ChatSidebar({ workspace, ruleName }) {
         if (xy.y + b.height > maxY) maxY = xy.y + b.height + 20;
       });
       newBlocks.forEach((b, i) => b.moveBy(20, maxY + i * 100));
-      if (newBlocks[0]) workspace.centerOnBlock(newBlocks[0].id);
+      if (newBlocks[0]) {
+        workspace.centerOnBlock(newBlocks[0].id);
+        setWorkspaceNotice({ message: "ワークスペースにブロックを追加しました" });
+      }
     } catch (e) {
       alert("ブロックの追加に失敗しました: " + e.message);
     }
@@ -194,6 +206,7 @@ export default function ChatSidebar({ workspace, ruleName }) {
 
   // ワークスペースのXMLを置き換える
   const handleReplaceWorkspace = (xmlContent) => {
+    setWorkspaceNotice(null);
     if (!workspace) return alert("ワークスペースが初期化されていません");
     if (!window.confirm("現在のワークスペースの内容をすべて置き換えますか？")) return;
     try {
@@ -202,6 +215,7 @@ export default function ChatSidebar({ workspace, ruleName }) {
       Blockly.Xml.domToWorkspace(xmlDom, workspace);
       const blocks = workspace.getTopBlocks();
       if (blocks[0]) workspace.centerOnBlock(blocks[0].id);
+      setWorkspaceNotice({ message: "ワークスペースのブロックを置き換えました" });
     } catch (e) {
       alert("ワークスペースの置き換えに失敗しました: " + e.message);
     }
@@ -235,6 +249,7 @@ export default function ChatSidebar({ workspace, ruleName }) {
     const controller = new AbortController();
     setChatController(controller);
 
+    console.log(generateAllBlocksXml(Blockly, workspace));
     try {
       const resp = await streamGeminiChat(
         {
@@ -483,6 +498,14 @@ export default function ChatSidebar({ workspace, ruleName }) {
 
               {/* 入力エリア */}
               <div className="border-t p-3">
+                <div role="status" aria-live="polite" aria-atomic="true">
+                  {workspaceNotice && (
+                    <p className="mb-3 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+                      <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {workspaceNotice.message}
+                    </p>
+                  )}
+                </div>
                 <div className="flex items-end gap-2">
                   <Textarea
                     ref={textareaRef}
