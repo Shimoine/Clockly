@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import * as Blockly from "blockly";
 
 import RuleEditorForm from "@/components/RuleEditor/RuleEditorForm";
+import ChatSidebar from "@/components/ChatSidebar";
 import { arrangeTopBlocks } from "@/core/blocklyLayout";
 import { updateProgram } from "@/lib/api";
 
@@ -21,6 +23,8 @@ export default function EditRulePage() {
   const id = location.state?.id ?? idFromUrl;
   const initialName = location.state?.name ?? "";
   const initialBlockXml = location.state?.block ?? null;
+  const [workspace, setWorkspace] = useState(null);
+  const [name, setName] = useState(initialName);
 
   const handleSubmit = async ({ workspace, name }) => {
     arrangeTopBlocks(workspace);
@@ -38,7 +42,7 @@ export default function EditRulePage() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-4 pb-20 sm:pr-20 sm:pb-0">
       <div className="shrink-0">
         <h1 className="text-2xl font-semibold">ルールの編集</h1>
         <p className="text-sm text-muted-foreground">
@@ -50,8 +54,11 @@ export default function EditRulePage() {
         initialBlockXml={initialBlockXml}
         submitLabel="ルールを変更"
         onSubmit={handleSubmit}
+        onWorkspaceReady={setWorkspace}
+        onNameChange={setName}
         className="flex-1"
       />
+      <ChatSidebar workspace={workspace} ruleName={name} />
     </div>
   );
 }
