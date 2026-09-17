@@ -133,13 +133,8 @@ svg[display="none"] {
   display: none;
 }
 
-/* Blockly標準のツールチップは、独自の説明カードに統一するため非表示にする。 */
-.blocklyTooltipDiv {
-  display: none !important;
-}
-
-/* Blockly の標準ツールチップを説明カードとして表示する． */
-.clockly-block-tooltip {
+/* setCustomTooltip で描画する標準コンテナ。Blockly の後挿入CSSより優先する。 */
+.blocklyTooltipDiv.clockly-block-tooltip {
   box-sizing: border-box;
   width: min(360px, calc(100vw - 24px));
   max-width: min(360px, calc(100vw - 24px));
@@ -154,15 +149,18 @@ svg[display="none"] {
   font-size: 0.8125rem;
   line-height: 1.55;
   opacity: 1;
-  position: fixed;
-  z-index: 100000;
+  /* 位置と display は Blockly に任せる（親コンテナ基準の absolute）。 */
+  /* Blockly 13 の待ち時間750msに加え、合計約1.5秒待って表示する。
+     display:none でアニメーションもリセットされるため独自タイマーは不要。 */
+  animation: clockly-tooltip-reveal 0s 750ms both;
   /* ツールチップがBlocklyのフィールドやドラッグ終了のイベントを
      奪わないよう、表示専用のオーバーレイにする。 */
   pointer-events: none;
 }
 
-.clockly-block-tooltip[hidden] {
-  display: none;
+@keyframes clockly-tooltip-reveal {
+  from { visibility: hidden; }
+  to { visibility: visible; }
 }
 
 .clockly-block-tooltip__content {

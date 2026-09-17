@@ -1,9 +1,6 @@
 import * as Blockly from "blockly";
 
 const TOOLTIP_CLASS = "clockly-block-tooltip";
-const TOOLTIP_OFFSET = 14;
-const VIEWPORT_PADDING = 12;
-const HOVER_DELAY_MS = 1500;
 
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
@@ -36,18 +33,24 @@ function appendValueSection(content, label, values) {
   content.appendChild(section);
 }
 
-function renderTooltip(tooltip, block) {
-  const text = Blockly.Tooltip.getTooltipOfObject(block)?.trim();
-  if (!text) return false;
-
+function renderTooltip(tooltip, element) {
+  // 編集領域の overflow:hidden でカードが切れないよう、ツールチップだけを
+  // ページ直下に配置する。Blockly は描画後、この親を基準に座標を計算する。
+  // setParentContainer はドロップダウンにも影響するため変更しない。
+  document.body.appendChild(tooltip);
+  tooltip.classList.add(TOOLTIP_CLASS);
   tooltip.replaceChildren();
-  const { type, insertableValues, connectableValues, description } = parseTooltip(text);
-  if (!type && !insertableValues && !connectableValues && !description) {
-    tooltip.appendChild(createElement("p", "clockly-block-tooltip__description", text));
-    return true;
-  }
+  const text = Blockly.Tooltip.getTooltipOfObject(element)?.trim();
+  if (!text) return;
 
   const content = createElement("div", "clockly-block-tooltip__content");
+  tooltip.appendChild(content);
+  const { type, insertableValues, connectableValues, description } = parseTooltip(text);
+  if (!type && !insertableValues && !connectableValues && !description) {
+    content.appendChild(createElement("p", "clockly-block-tooltip__description", text));
+    return;
+  }
+
   if (type) {
     const header = createElement("div", "clockly-block-tooltip__header");
     header.appendChild(createElement("span", "clockly-block-tooltip__eyebrow", "ブロックの型"));
@@ -58,107 +61,12 @@ function renderTooltip(tooltip, block) {
 
   appendValueSection(content, "挿入可能な型", insertableValues);
   appendValueSection(content, "接続可能な型", connectableValues);
-  tooltip.appendChild(content);
-  return true;
 }
 
-/** Blockly の内部ポップアップを変更せず、ホバー時だけ説明カードを表示する。 */
-export function createBlocklyTooltip(container, workspace) {
-  const tooltip = createElement("div", TOOLTIP_CLASS);
-  tooltip.hidden = true;
-  tooltip.setAttribute("aria-hidden", "true");
-  document.body.appendChild(tooltip);
-
-  let activeBlock = null;
-  let hoveredBlock = null;
-  let showTimer = null;
-  let lastPointerPosition = null;
-
-  const cancelShow = () => {
-    if (showTimer) window.clearTimeout(showTimer);
-    showTimer = null;
-  };
-
-  const hide = () => {
-    cancelShow();
-    activeBlock = null;
-    hoveredBlock = null;
-    tooltip.hidden = true;
-    tooltip.style.visibility = "hidden";
-  };
-
-  const position = (event) => {
-    if (tooltip.hidden) return;
-
-    let left = event.clientX + TOOLTIP_OFFSET;
-    let top = event.clientY + TOOLTIP_OFFSET;
-    const { width, height } = tooltip.getBoundingClientRect();
-    left = Math.min(left, window.innerWidth - width - VIEWPORT_PADDING);
-    top = Math.min(top, window.innerHeight - height - VIEWPORT_PADDING);
-    tooltip.style.left = `${Math.max(VIEWPORT_PADDING, left)}px`;
-    tooltip.style.top = `${Math.max(VIEWPORT_PADDING, top)}px`;
-    tooltip.style.visibility = "visible";
-  };
-
-  const getBlockFromEvent = (event) => {
-    const blockElement = event.target.closest?.(".blocklyBlock");
-    const blockId = blockElement?.getAttribute("data-id");
-    if (!blockId) return null;
-
-    // flyout (ツールボックス) はメインとは別ワークスペースなので、SVGを
-    // 起点にブロックを保持しているワークスペースを特定する。
-    const blockWorkspace = [workspace, ...Blockly.common.getAllWorkspaces()]
-      .find((candidate) => candidate.rendered && candidate.getParentSvg()?.contains(blockElement));
-    const block = blockWorkspace?.getBlockById(blockId);
-    return block && !block.isShadow() ? block : null;
-  };
-
-  const show = (event) => {
-    const block = getBlockFromEvent(event);
-    if (!block) {
-      hide();
-      return;
-    }
-
-    lastPointerPosition = { clientX: event.clientX, clientY: event.clientY };
-    if (activeBlock === block) {
-      position(lastPointerPosition);
-      return;
-    }
-
-    if (hoveredBlock === block) return;
-
-    cancelShow();
-    activeBlock = null;
-    hoveredBlock = block;
-    tooltip.hidden = true;
-    tooltip.style.visibility = "hidden";
-
-    showTimer = window.setTimeout(() => {
-      if (!hoveredBlock || hoveredBlock.isShadow()) return;
-
-      activeBlock = hoveredBlock;
-      tooltip.hidden = !renderTooltip(tooltip, hoveredBlock);
-      position(lastPointerPosition);
-      showTimer = null;
-    }, HOVER_DELAY_MS);
-  };
-
-  const handlePointerOut = (event) => {
-    const leavingBlock = event.target.closest?.(".blocklyBlock");
-    const enteringBlock = event.relatedTarget?.closest?.(".blocklyBlock");
-    if (leavingBlock !== enteringBlock) hide();
-  };
-
-  container.addEventListener("pointerover", show);
-  container.addEventListener("pointermove", show);
-  container.addEventListener("pointerout", handlePointerOut);
-
-  return () => {
-    cancelShow();
-    container.removeEventListener("pointerover", show);
-    container.removeEventListener("pointermove", show);
-    container.removeEventListener("pointerout", handlePointerOut);
-    tooltip.remove();
-  };
+/**
+ * アプリ起動時に一度登録する。ツールボックスやプレビューも同じ描画を使い、
+ * 表示位置・ホバー判定・操作中の非表示は Blockly に任せる。
+ */
+export function registerBlocklyTooltip() {
+  Blockly.Tooltip.setCustomTooltip(renderTooltip);
 }

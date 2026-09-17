@@ -5,7 +5,6 @@ import "@/core/blocks/registerBlocks.js"; // 副作用: Blockly.Blocksへのカ�
 import { toolboxConfig } from "@/core/toolbox.js";
 import generateAllBlocksXml from "@/core/generateAllBlocksXml.js";
 import { arrangeTopBlocks } from "@/core/blocklyLayout.js";
-import { createBlocklyTooltip } from "@/core/blocklyTooltip.js";
 import { getCalendarList, requestGeminiCompletion } from "@/lib/api.js";
 
 /**
@@ -95,7 +94,6 @@ export function useBlocklyWorkspace({ containerRef, initialXml, ruleName }) {
     }
 
     registerCalendarVariables(ws);
-    const disposeTooltip = createBlocklyTooltip(containerRef.current, ws);
     ws.resize();
     ws.scrollCenter();
     setWorkspace(ws);
@@ -154,7 +152,6 @@ export function useBlocklyWorkspace({ containerRef, initialXml, ruleName }) {
 
     return () => {
       resizeObserver?.disconnect();
-      disposeTooltip();
       ws.dispose();
       setWorkspace(null);
     };
