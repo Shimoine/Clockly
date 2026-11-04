@@ -1,5 +1,6 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator } from 'blockly/javascript';
+import { ShiftDateModeField, ShiftDateSettingsIcon } from './shiftDateSettings.js';
 
 function createTooltip({ type, insertableValues = "", connectableValues = "", description }) {
     return [
@@ -18,7 +19,7 @@ map: 予定のmap操作
 filter: 予定の絞り込み
 property: 予定（予定集合）のプロパティを抽出
 replace: プロパティの置換
-move: 日付の変更
+shift_date: 日付を相対的に移動
 if: 条件分岐
 and: 論理積
 or: 論理和      TODO:プルダウンにして論理積と統合すべきかも
@@ -541,17 +542,25 @@ Blockly.Blocks['hide'] = {
 //     }
 // };
 
-Blockly.Blocks['move_date'] = {
+Blockly.Blocks['shift_date'] = {
     init: function() {
-        this.appendValueInput("date")
-            .setCheck(["year", "month", "date", "day", "specified_year", "specified_month", "specified_week", "specified_date"])
+        const modeField = new ShiftDateModeField();
+        this.appendDummyInput("")
+            .appendField("予定の日付を")
+            .appendField(modeField, "mode");
+        modeField.setVisible(false);
+        this.appendDummyInput("shift")
+            .appendField(new Blockly.FieldNumber(1, 1, Infinity, 1), "text")
+            .appendField(new Blockly.FieldDropdown([["日","date"], ["週","week"], ["か月","month"], ["年","year"]]), "property")
+            .appendField(new Blockly.FieldDropdown([["後へ（未来）","forward"], ["前へ（過去）","backward"]]), "direction");
         this.appendDummyInput()
-            .appendField("に日付を移す");
-        this.setInputsInline(true);
+            .appendField("動かす");
+        this.setInputsInline(false);
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip(createTooltip({ type: "加工", insertableValues: "年，月，日，曜日",connectableValues: "任意", description: "予定の開始日時と終了日時の日付を，指定した日付へ変更する．予定を加工する処理の中で使用する．" }));
+        this.setMutator(new ShiftDateSettingsIcon(this));
+        this.setTooltip(createTooltip({ type: "加工", insertableValues: "なし", connectableValues: "任意", description: "予定の日付を指定量だけ動かす。月・年の移動方法は歯車アイコンから設定できる。" }));
         this.setHelpUrl("");
     }
 };
@@ -566,7 +575,7 @@ Blockly.Blocks['move_time'] = {
         this.setPreviousStatement(true, "map");
         this.setNextStatement(true, "map");
         this.setColour(240);
-        this.setTooltip(createTooltip({ type: "加工", insertableValues: "時刻", connectableValues: "任意",description: "予定の開始時刻と終了時刻を，指定した時刻へ変更する．予定を加工する処理の中で使用する．" }));
+        this.setTooltip("");
         this.setHelpUrl("");
     }
 };
@@ -1380,16 +1389,16 @@ javascriptGenerator.forBlock['hide_test'] = function(block) {
     return code;
 };
 
-javascriptGenerator.forBlock['move_date'] = function(block) {
-    var date = javascriptGenerator.valueToCode(block, 'date', javascriptGenerator.ORDER_ATOMIC);
-    var code = 'move(e.start.date, normalize_date("' + date + '"));'
-    return code;
+javascriptGenerator.forBlock['shift_date'] = function(block) {
+    const amount = Number(block.getFieldValue('text'));
+    const unit = block.getFieldValue('property');
+    const direction = block.getFieldValue('direction');
+    const mode = block.getFieldValue('mode') || 'nth_weekday';
+    return `shift_date(e, { amount: ${amount}, unit: ${JSON.stringify(unit)}, direction: ${JSON.stringify(direction)}, mode: ${JSON.stringify(mode)} });\n`;
 };
 
-javascriptGenerator.forBlock['move_time'] = function(block) {
-    var time = javascriptGenerator.valueToCode(block, 'time', javascriptGenerator.ORDER_ATOMIC);
-    var code = 'move(e.start.time, ' + time + ');'
-    return code;
+javascriptGenerator.forBlock['move_time'] = function() {
+    return 'move_time(e);\n';
 };
 
 javascriptGenerator.forBlock['if'] = function(block) {
@@ -1548,8 +1557,8 @@ javascriptGenerator.forBlock['specified_year'] = function(block) {
     var year = block.getFieldValue('year');
     var monthCode = javascriptGenerator.valueToCode(block, 'month', javascriptGenerator.ORDER_ATOMIC) || null;
     var code = monthCode
-        ? `({ type: "relative_year", unit: "${year}", month: ${monthCode} })`
-        : `({ type: "relative_year", unit: "${year}" })`;
+        ? `({ type: "specified_year", unit: "${year}", month: ${monthCode} })`
+        : `({ type: "specified_year", unit: "${year}" })`;
     return [code, javascriptGenerator.ORDER_ATOMIC];
 };
 
@@ -1557,8 +1566,8 @@ javascriptGenerator.forBlock['specified_month'] = function(block) {
     var month = block.getFieldValue('month');
     var dateCode = javascriptGenerator.valueToCode(block, 'date', javascriptGenerator.ORDER_ATOMIC) || null;
     var code = dateCode
-        ? `({ type: "relative_month", unit: "${month}", date: ${dateCode} })`
-        : `({ type: "relative_month", unit: "${month}" })`;
+        ? `({ type: "specified_month", unit: "${month}", date: ${dateCode} })`
+        : `({ type: "specified_month", unit: "${month}" })`;
     return [code, javascriptGenerator.ORDER_ATOMIC];
 };
 
@@ -1566,14 +1575,14 @@ javascriptGenerator.forBlock['specified_week'] = function(block) {
     var week = block.getFieldValue('week');
     var dayCode = javascriptGenerator.valueToCode(block, 'day', javascriptGenerator.ORDER_ATOMIC) || null;
     var code = dayCode
-        ? `({ type: "relative_week", unit: "${week}", day: ${dayCode} })`
-        : `({ type: "relative_week", unit: "${week}" })`;
+        ? `({ type: "specified_week", unit: "${week}", day: ${dayCode} })`
+        : `({ type: "specified_week", unit: "${week}" })`;
     return [code, javascriptGenerator.ORDER_ATOMIC];
 };
 
 javascriptGenerator.forBlock['specified_date'] = function(block) {
     var date = block.getFieldValue('date');
-    var code = `({ type: "relative_date", unit: "${date}" })`;
+    var code = `({ type: "specified_date", unit: "${date}" })`;
     return [code, javascriptGenerator.ORDER_ATOMIC];
 };
 

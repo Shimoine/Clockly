@@ -186,21 +186,11 @@ export const toolboxConfig = {
         { kind: "block", type: "hide" },
         {
           kind: "block",
-          type: "move_date",
-          inputs: {
-            date: {
-              shadow: { type: "dummy_value", fields: { text: "日付" } },
-            },
-          },
+          type: "shift_date"
         },
         {
           kind: "block",
-          type: "move_time",
-          inputs: {
-            time: {
-              shadow: { type: "dummy_value", fields: { text: "時刻" } },
-            },
-          },
+          type: "move_time"
         },
       ],
     },
